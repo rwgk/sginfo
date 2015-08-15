@@ -22,10 +22,9 @@ def tail():
   please_visit_cctbx()
   print "<hr>"
   print "<address>"
-  print "<a href=\"http://cci.lbl.gov/~rwgk/\""
-  print ">Ralf W. Grosse-Kunstleve</a>"
-  print "&lt;<a href=\"mailto:rwgk@cci.lbl.gov\""
-  print "                    >rwgk@cci.lbl.gov</a>&gt;"
+  print "Ralf W. Grosse-Kunstleve"
+  print "&lt;<a href=\"mailto:rwgkio+sginfo@gmail.com\""
+  print "                    >rwgkio+sginfo@gmail.com</a>&gt;"
   print "</address>"
   print "</body>"
   print "</html>"
