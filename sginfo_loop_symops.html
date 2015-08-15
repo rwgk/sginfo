@@ -1,0 +1,82 @@
+<html>
+
+<head>
+<title>SgInfo Loop SymOps</title>
+</head>
+
+<body>
+<h2>SgInfo Loop SymOps</h2>
+<p>The following template code shows how to loop all
+   symops.
+<p>At first, <samp>nLoopInv</samp> is set using the
+   <samp>Sg_nLoopInv</samp> macro. <samp>nLoopInv</samp>
+   can take two values, <samp>1</samp> if the space
+   group is acentric or there is an inversion operation
+   off origin, or <samp>2</samp> if the space group
+   is centric.
+<p><samp>iModPositive(i, j)</samp>
+   at the bottom is a very simple function which
+   essentially returns <samp>i % j</samp>. However,
+   if <samp>i % j</samp> is less than <samp>0</samp>,
+   <samp>iModPositive()</samp> will return
+   <samp>i % j + j</samp> in order to make the
+   result positive. In the present example
+   <samp>iModPositive()</samp> ensures that the
+   translation components of <samp>SMx</samp>
+   will always be in the range <samp>[0...(STBF-1)]</samp>.
+<p>This isn't too bad, is it?
+<hr>
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#include "sginfo.h"
+
+static void LoopSymOps(const T_SgInfo *SgInfo)
+{
+  int           iList, f, i;
+  int           nTrV, iTrV, nLoopInv, iLoopInv;
+  const int     *TrV;
+  T_RTMx        SMx;
+  const T_RTMx  *lsmx;
+
+
+  nLoopInv = Sg_nLoopInv(SgInfo);
+
+  nTrV = SgInfo-&gt;LatticeInfo-&gt;nTrVector;
+   TrV = SgInfo-&gt;LatticeInfo-&gt;TrVector;
+
+  for (iTrV = 0; iTrV &lt; nTrV; iTrV++, TrV += 3)
+  {
+    for (iLoopInv = 0; iLoopInv &lt; nLoopInv; iLoopInv++)
+    {
+      if (iLoopInv == 0) f =  1;
+      else               f = -1;
+
+      lsmx = SgInfo-&gt;ListSeitzMx;
+
+      for (iList = 0; iList &lt; SgInfo-&gt;nList; iList++, lsmx++)
+      {
+        for (i = 0; i &lt; 9; i++)
+          SMx.s.R[i] =              f * lsmx-&gt;s.R[i];
+
+        for (i = 0; i &lt; 3; i++)
+          SMx.s.T[i] = <a name="#iModPositive">iModPositive</a>(f * lsmx-&gt;s.T[i] + TrV[i], STBF);
+
+        /* use SMx at this point
+         */
+      }
+    }
+  }
+}
+</pre>
+<hr>
+
+<address>
+ Ralf W. Grosse-Kunstleve
+ &lt;<a href="mailto:rwgk@cci.lbl.gov"
+                    >rwgk@cci.lbl.gov</a>&gt;
+</address>
+
+</body>
+</html>

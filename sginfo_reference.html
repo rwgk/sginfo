@@ -1,0 +1,2159 @@
+<html>
+
+<head>
+<title>SgInfo Reference Section</title>
+</head>
+
+<body>
+
+<h2><a name="head" href="sginfo.html#overview">SgInfo Reference Section</a></h2>
+<ul>
+  <li><a href="#how_to_include_sginfo_h">
+      How to <samp>#include &quot;sginfo.h&quot;</samp></a>
+  <li><a href="#handling_errors">
+      Handling errors: SgError</a>
+  <li><a href="#base_factors">
+      Rotation &amp; Translation Base Factors</a>
+  <li><a href="#legal_matrices">
+      <strong>SgInfo</strong> &quot;legal&quot; Seitz matrices</a>
+  <li><a href="#sginfo_structures">
+      <strong>SgInfo</strong> structures</a>
+  <li><a href="#sginfo_functions">
+      <strong>SgInfo</strong> functions</a>
+  <li><a href="#sginfo_macros">
+      <strong>SgInfo</strong> macros</a>
+</ul>
+
+<hr>
+<h3><a name="how_to_include_sginfo_h" href="#head">
+    How to #include &quot;sginfo.h&quot;</a></h3>
+
+<p> There are two ways of including <samp>sginfo.h</samp>.
+    The first way is to simply have
+    <samp>#include&nbsp;&quot;sginfo.h&quot;</samp>, the second
+    is to precede this statement by
+    <samp>#define&nbsp;SGCOREDEF__</samp>.
+<p> Without <samp>#define&nbsp;SGCOREDEF__</samp> various
+    declarations, globals, and <samp>#define</samp>'s are not
+    &quot;visible&quot;.
+    Please check <samp>sginfo.h</samp> if you need to know
+    the details.
+
+<hr>
+<h3><a name="handling_errors" href="#head">
+    Handling errors: SgError</a></h3>
+
+<p> <samp>sginfo.h</samp> defines
+    <samp>&quot;const char *SgError;&quot;</samp>. Whenever
+    a call to one of the SgInfo library routines generates
+    an error condiditon, <samp>SgError</samp> is set via
+    <a href="#func_SetSgError">SetSgError()</a>.
+    An application can now take appropriate actions, e.g.
+    print the message in a pop-up window.
+<p> <strong>Important</strong>: if an error occurred
+    and <samp>SgError</samp>
+    was set, it has to be reset (<samp>SgError = NULL;</samp>)
+    prior to more calls to the library!
+<p> If <samp>SGCOREDEF__</samp> is defined before including
+    <samp>sginfo.h</samp>, the static character array
+    <samp>SgErrorBuffer</samp> is visible, too. This buffer
+    is intended to hold &quot;dynamic&quot; error messages
+    and could be useful when expanding the library.
+
+<hr>
+<h3><a name="base_factors" href="#head">
+    Rotation &amp; Translation Base Factors</a></h3>
+
+<p> Except for two routines in <samp>sgio.c</samp>
+    (<samp>ParseSymXYZ()</samp> and <samp>FormatFraction()</samp>)
+    floating point arithmetic is not used in the
+    <strong>SgInfo</strong> library routines. By choosing
+    proper <em>Rotation &amp; Translation Base Factors</em>
+    all computations can be done with integer arithmetic.
+    Base factors for two types of matrices are defined in
+    <samp>sginfo.h</samp>.
+
+<p> For Seitz matrices, always labeled <samp>SeitzMx</samp>
+    or sometimes <samp>SMx</samp>, the <em>Seitz Matrix
+    Rotation Base Factor</em> is always <samp>1</samp>,
+    there is no explicit definition.<br>
+    The <em>Seitz Matrix Translation Base Factor</em>
+    <samp>STBF</samp> is defined to be <samp>12</samp> in
+    <samp>sginfo.h</samp>.
+
+<p> For Change-of-Basis matrices, always labeled
+    <samp>CBMx</samp> or <samp>InvCBMx</samp>, the
+    <em>Change-of-Basis Matrix Rotation Base Factor</em>
+    <samp>CRBF</samp> is defined to be <samp>12</samp>.
+<br>The <em>Change-of-Basis Matrix Translation Base Factor</em>
+    <samp>CTBF</samp> is defined to be <samp>72</samp>.
+
+<hr>
+<h3><a name="legal_matrices" href="#head">
+    <strong>SgInfo</strong> &quot;legal&quot; Seitz matrices</a></h3>
+<p>A &quot;legal&quot; <strong>SgInfo</strong> Seitz matrix has
+   a 3x3 rotation part for which
+   <samp><a href="#func_GetRotMxInfo">GetRotMxInfo()</a></samp> returns
+   <em>not</em> <samp>0</samp>, and 3 integer translation
+   components in the range
+   <samp>[0...(<a href="#base_factors">STBF</a>-1)]</samp>.
+<p>Another possible definition for the 3x3 rotation part:
+   all rotation operations which appear in ITVA Table 7.
+   (The 230 Space groups) are legal <samp>SgInfo</samp>
+   rotation matrices.
+<p>Rotation matrices which are the result of a transformation of
+   a centred space group to a primitive setting are in general
+   <strong>not</strong> legal <samp>SgInfo</samp> rotation
+   matrices.
+<p>E.g, when transforming space group &quot;I 4&quot; to a
+   primitive setting, the resulting rotation matrices are
+   not accepted by <samp>GetRotMxInfo()</samp>. However, it is
+   of course possible to transform the space group <em>after</em>
+   its generation. But then it is no longer allowed to use any
+   of the <strong>SgInfo</strong> library routines.
+<p>Remark: the set of legal rotation matrices is derived by
+   applying matrix inversion and appropriate basis
+   transformations to the set of
+   12 &quot;prototype&quot; matrices defined
+   in <samp>TabXtalRotMx</samp>
+   in <samp>sginfo.h</samp>.
+
+<hr>
+<h2><a name="sginfo_structures" href="#head">SgInfo structures</a></h2>
+<ul>
+  <li><samp><a href="#tdef_T_SgInfo">T_SgInfo</a></samp>
+  <li><samp><a href="#tdef_T_LatticeInfo">T_LatticeInfo</a></samp>
+  <li><samp><a href="#tdef_T_RTMx">T_RTMx</a></samp>
+  <li><samp><a href="#tdef_T_RotMxInfo">T_RotMxInfo</a></samp>
+  <li><samp><a href="#tdef_T_TabSgName">T_TabSgName</a></samp>
+  <li><samp><a href="#tdef_T_Eq_hkl">T_Eq_hkl</a></samp>
+</ul>
+
+<hr>
+<h3><a name="tdef_T_SgInfo" href="#sginfo_structures">T_SgInfo</a></h3>
+<pre>
+typedef struct
+  {
+    int                  <a href="#SgInfo_GenOption">GenOption</a>;
+    int                  <a href="#SgInfo_Centric">Centric</a>;
+    int                  <a href="#SgInfo_InversionOffOrigin">InversionOffOrigin</a>;
+    const <a href="#tdef_T_LatticeInfo">T_LatticeInfo</a>  <a href="#SgInfo_LatticeInfo">*LatticeInfo</a>;
+    int                  <a href="#SgInfo_StatusLatticeTr">StatusLatticeTr</a>;
+    int                  <a href="#SgInfo_OriginShift">OriginShift[3]</a>;
+    int                  <a href="#SgInfo_nList">nList</a>;
+    int                  <a href="#SgInfo_MaxList">MaxList</a>;
+    <a href="#tdef_T_RTMx">T_RTMx</a>               <a href="#SgInfo_ListSeitzMx">*ListSeitzMx</a>;
+    <a href="#tdef_T_RotMxInfo">T_RotMxInfo</a>          <a href="#SgInfo_ListRotMxInfo">*ListRotMxInfo</a>;
+    int                  <a href="#SgInfo_OrderL">OrderL</a>;
+    int                  <a href="#SgInfo_OrderP">OrderP</a>;
+    int                  <a href="#SgInfo_XtalSystem">XtalSystem</a>;
+    int                  <a href="#SgInfo_UniqueRefAxis">UniqueRefAxis</a>;
+    int                  <a href="#SgInfo_UniqueDirCode">UniqueDirCode</a>;
+    int                  <a href="#SgInfo_ExtraInfo">ExtraInfo</a>;
+    int                  <a href="#SgInfo_PointGroup">PointGroup</a>;
+    int                  <a href="#SgInfo_nGenerator">nGenerator</a>;
+    int                   <a href="#SgInfo_Generator_iList">Generator_iList[4]</a>;
+    char                 <a href="#SgInfo_HallSymbol">HallSymbol[MaxLenHallSymbol + 1]</a>;
+    const <a href="#tdef_T_TabSgName">T_TabSgName</a>    <a href="#SgInfo_TabSgName">*TabSgName</a>;
+    const int            <a href="#SgInfo_CCMx_LP">*CCMx_LP</a>;
+    int                  <a href="#SgInfo_n_si_Vector">n_si_Vector</a>;
+    int                  <a href="#SgInfo_si_Vector">si_Vector[9]</a>;
+    int                  <a href="#SgInfo_si_Modulus">si_Modulus[3]</a>;
+  }
+  T_SgInfo;
+</pre>
+
+<dl>
+<dt><samp><a name="SgInfo_GenOption" href="#tdef_T_SgInfo">
+  GenOption</a></samp>
+  <dd>
+     <dl><dt>takes three possible values:
+       <dd><samp>&nbsp;0</samp> = full group generation
+       <dd><samp>&nbsp;1</samp> = trusted: set
+           <samp>Centric/InversionOffOrigin/LatticeInfo</samp> only
+       <dd><samp>-1</samp> = no group generation
+    </dl>
+    <samp>GenOption</samp> should always be set to <samp>0</samp>.
+    The alternative values are only for <strong>SgInfo</strong>
+    internal usage
+    (see the description of
+    <a href="#func_Add2ListSeitzMx">Add2ListSeitzMx()</a>).<br>
+    A call to <a href="#func_InitSgInfo">InitSgInfo()</a>
+    will set <samp>GenOption</samp> to <samp>0</samp>.
+
+<dt><samp><a name="SgInfo_Centric" href="#tdef_T_SgInfo">
+  Centric</a></samp>
+  <dd>
+     <dl><dt>takes three possible values:
+       <dd><samp>&nbsp;0</samp> = acentric
+       <dd><samp>&nbsp;1</samp> = inversion operation in
+                                  <samp>ListSeitzMx</samp>
+       <dd><samp>-1</samp> = inversion operation removed
+                             from <samp>ListSeitzMx</samp>
+    </dl>
+    After a call to <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>
+    <samp>Centric</samp> will be either <samp>0</samp> or <samp>-1</samp>.
+
+<dt><samp><a name="SgInfo_InversionOffOrigin" href="#tdef_T_SgInfo">
+  InversionOffOrigin</a></samp>
+  <dd>
+     <dl><dt>takes two possible values:
+       <dd><samp>&nbsp;0</samp> = <samp>ListSeitzMx</samp> does not ...
+       <dd><samp>&nbsp;1</samp> = <samp>ListSeitzMx</samp> does contain an
+                            inversion operation off origin
+    </dl>
+
+<dt><samp><a name="SgInfo_LatticeInfo" href="#tdef_T_SgInfo">
+  LatticeInfo</a></samp>
+  <dd>is a pointer to a constant
+      <samp><a href="#tdef_T_LatticeInfo">T_LatticeInfo</a></samp>
+      structure.
+
+<dt><samp><a name="SgInfo_StatusLatticeTr" href="#tdef_T_SgInfo">
+  StatusLatticeTr</a></samp>
+  <dd>
+     <dl><dt>takes three possible values:
+       <dd><samp>&nbsp;0</samp> = translation matrices removed
+                                  from <samp>ListSeitzMx</samp>
+       <dd><samp>&nbsp;1</samp> = all translation matrices in
+                                  <samp>ListSeitzMx</samp>
+       <dd><samp>-1</samp> = some translation matrices could be missing in
+                            <samp>ListSeitzMx</samp>
+    </dl>
+    After a call to <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>
+    <samp>StatusLatticeTr</samp> will always be <samp>0</samp>.
+
+<dt><samp><a name="SgInfo_OriginShift" href="#tdef_T_SgInfo">
+  OriginShift</a></samp>
+  <dd>stores the
+      <a href="hall_symbols.html#definition_origin_shift_vector">
+      Hall symbol</a> origin-shift translation vector.
+
+<dt><samp><a name="SgInfo_nList" href="#tdef_T_SgInfo">
+  nList</a></samp>
+  <dd>holds the number of valid matrices stored in <samp>ListSeitzMx</samp>
+      (and corresponding entries in <samp>ListRotMxInfo</samp>).
+
+<dt><samp><a name="SgInfo_MaxList" href="#tdef_T_SgInfo">
+  MaxList</a></samp>
+  <dd>holds the maximum number of matrices which can be
+      stored in <samp>ListSeitzMx</samp> (and entries which can be stored in
+      <samp>ListRotMxInfo</samp>). <samp>MaxList</samp> should always be set
+      to <samp>192</samp>, the largest possible number of
+      symmetry operations.
+
+<dt><samp><a name="SgInfo_ListSeitzMx" href="#tdef_T_SgInfo">
+  ListSeitzMx</a></samp>
+  <dd>is a pointer to an array of
+      <samp><a href="#tdef_T_RTMx">T_RTMx</a></samp> unions.
+      These unions hold
+      the rotation parts of the Seitz matrices (with factor 1)
+      and the translation parts, multiplied by the
+      Seitz-matrix-Translation-Base-Factor
+      <samp><a href="#base_factors">STBF</a></samp>.
+
+<dt><samp><a name="SgInfo_ListRotMxInfo" href="#tdef_T_SgInfo">
+  ListRotMxInfo</a></samp>
+  <dd>is a pointer to an array of
+      <samp><a href="#tdef_T_RotMxInfo">T_RotMxInfo</a></samp> structures.
+      For each entry in ListSeitzMx, ListRotMxInfo stores the corresponding
+      set of EigenVector, Order, and two codes for the reference axis.
+
+<dt><samp><a name="SgInfo_OrderL" href="#tdef_T_SgInfo">
+  OrderL</a></samp>
+  <dd>holds the order of the space group, i.e. the maximum number
+      of symmetry equivalent positions. For primitive space groups
+      <samp>OrderL</samp> = <samp>OrderP</samp>.<br>
+  Only valid after a call to
+  <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>!
+
+<dt><samp><a name="SgInfo_OrderP" href="#tdef_T_SgInfo">
+  OrderP</a></samp>
+  <dd>holds the order of the primitive subgroup of the space group.<br>
+  Only valid after a call to
+  <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>!
+
+<dt><samp><a name="SgInfo_XtalSystem" href="#tdef_T_SgInfo">
+  XtalSystem</a></samp>
+  <dd>is one of the constants:
+     <dl>
+       <dd>XS_Unknown
+       <dd>XS_Triclinic
+       <dd>XS_Monoclinic
+       <dd>XS_Orthorhombic
+       <dd>XS_Tetragonal
+       <dd>XS_Trigonal
+       <dd>XS_Hexagonal
+    </dl>
+  defined in <samp>sginfo.h</samp>.<br>
+  Only valid after a call to
+  <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>!<br>
+  The string, e.g., "Orthorhombic" can be obtained by
+  <samp>XS_Name[XS_Orthorhombic]</samp>. <samp>XS_Name</samp> is
+  also defined in <samp>sginfo.h</samp>. Printing the crystal
+  system is therefore done like:<br> <dl><dd>
+    <samp>printf(&quot;This&nbsp;space&nbsp;group&nbsp;belongs&nbsp;to&nbsp;the&nbsp;%s&nbsp;crystal&nbsp;system\n&quot;,</samp><br>
+    <dl><dd><samp>XS_Name[SgInfo.XtalSystem]);</samp></dl></dl>
+
+<dt><samp><a name="SgInfo_UniqueRefAxis" href="#tdef_T_SgInfo">
+  UniqueRefAxis</a></samp>
+  <dd>holds a code for the unique axis
+  (see <samp><a href="#tdef_T_RotMxInfo">T_RotMxInfo</a></samp>).
+  For triclinic and orthorhombic space groups <samp>UniqueRefAxis</samp>
+  is <samp>0</samp>.<br>
+  Only valid after a call to
+  <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>!
+
+<dt><samp><a name="SgInfo_UniqueDirCode" href="#tdef_T_SgInfo">
+  UniqueDirCode</a></samp>
+  <dd>holds a code for the unique axis
+  (see <samp><a href="#tdef_T_RotMxInfo">T_RotMxInfo</a></samp>).
+  For triclinic and orthorhombic space groups <samp>UniqueDirCode</samp>
+  is <samp>0</samp>.<br>
+  Only valid after a call to
+  <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>!
+
+<dt><samp><a name="SgInfo_ExtraInfo" href="#tdef_T_SgInfo">
+  ExtraInfo</a></samp>
+  <dd>is one of the constants:
+    <dl>
+       <dd>EI_Unknown
+       <dd>EI_Enantiomorphic
+       <dd>EI_Obverse
+       <dd>EI_Reverse
+    </dl>
+  defined in <samp>sginfo.h</samp>.<br>
+  Only valid after a call to
+  <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>!<br>
+  The string, e.g., "Obverse" can be obtained by
+  <samp>EI_Name[EI_Obverse]</samp>. <samp>EI_Name</samp> is
+  also defined in <samp>sginfo.h</samp>. Printing <samp>ExtraInfo</samp>
+  is therefore done like:<br> <dl><dd>
+    <samp>printf(&quot;This&nbsp;space&nbsp;group&nbsp;is&nbsp;%s\n&quot;,</samp><br>
+    <dl><dd><samp>EI_Name[SgInfo.ExtraInfo]);</samp></dl></dl>
+
+<dt><samp><a name="SgInfo_PointGroup" href="#tdef_T_SgInfo">
+  PointGroup</a></samp>
+  <dd>is one of the constants:
+    <dl>
+       <dd>PG_Unknown
+       <dd>PG_1
+       <dd>PG_1b
+       <dd>PG_2
+       <dd>PG_m
+       <dd>PG_2_m
+       <dd>PG_222
+       <dd>PG_mm2
+       <dd>PG_mmm
+       <dd>PG_4
+       <dd>PG_4b
+       <dd>PG_4_m
+       <dd>PG_422
+       <dd>PG_4mm
+       <dd>PG_4b2m
+       <dd>PG_4bm2
+       <dd>PG_4_mmm
+       <dd>PG_3
+       <dd>PG_3b
+       <dd>PG_321
+       <dd>PG_312
+       <dd>PG_32
+       <dd>PG_3m1
+       <dd>PG_31m
+       <dd>PG_3m
+       <dd>PG_3bm1
+       <dd>PG_3b1m
+       <dd>PG_3bm
+       <dd>PG_6
+       <dd>PG_6b
+       <dd>PG_6_m
+       <dd>PG_622
+       <dd>PG_6mm
+       <dd>PG_6bm2
+       <dd>PG_6b2m
+       <dd>PG_6_mmm
+       <dd>PG_23
+       <dd>PG_m3b
+       <dd>PG_432
+       <dd>PG_4b3m
+       <dd>PG_m3bm
+    </dl>
+  defined in <samp>sginfo.h</samp>.<br>
+  Only valid after a call to
+  <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>!<br>
+  To evaluate <samp>PointGroup</samp>, <samp>sginfo.h</samp> defines
+  several macros and arrays:
+   <dl>
+      <dt><samp>PG_Index(PG_Code)</samp>
+        <dd>returns an index which can be used to access
+            <samp>PG_Names</samp> and <samp>LG_Code_of_PG_Index</samp>.<br>
+            <samp>PG_Names[PG_Index(SgInfo.PointGroup)]</samp>
+            is a pointer to a string, e.g.
+            &quot;<samp>m-3m</samp>&quot;
+            if <samp>SgInfo.PointGroup</samp> = <samp>PG_m3bm</samp>.
+            <br>
+            <samp>LG_Code_of_PG_Index[PG_Index(SgInfo.PointGroup)]</samp>
+            is the point group code of the Laue group of
+            <samp>SgInfo.PointGroup</samp>, e.g. PG_mmm if
+            <samp>SgInfo.PointGroup</samp> is <samp>PG_mm2</samp> or
+            <samp>PG_222</samp>.
+      <dt><samp>PG_Number(PG_Code)</samp>
+        <dd>returns the point group number (range = 1...32) of
+            <samp>PG_Code</samp>,
+            in the order of Table 10.6.1 of ITVA 1983.
+      <dt><samp>LG_Number(PG_Code)</samp>
+        <dd>returns the Laue group number (range = 1...11) of
+            <samp>PG_Code</samp>,
+            in the order of Table 10.6.1 of ITVA 1983.
+  </dl>
+
+<dt><samp><a name="SgInfo_nGenerator" href="#tdef_T_SgInfo">
+  nGenerator</a></samp>
+  <dd>holds the number of generator indices stored in
+      <samp>Generator_iList</samp>.<br>
+  Only valid after a call to
+  <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>!
+
+<dt><samp><a name="SgInfo_Generator_iList" href="#tdef_T_SgInfo">
+  Generator_iList</a></samp>
+  <dd>holds the indices of the Seitz matrices in
+      <samp>ListSeitzMx</samp> which have been selected for the
+      construction of <samp>HallSymbol</samp>.<br>
+  Only valid after a call to
+  <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>!
+
+<dt><samp><a name="SgInfo_HallSymbol" href="#tdef_T_SgInfo">
+  HallSymbol</a></samp>
+  <dd>stores the Hall symbol built by <strong>SgInfo</strong>.<br>
+  Only valid after a call to
+  <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>!
+
+<dt><samp><a name="SgInfo_TabSgName" href="#tdef_T_SgInfo">
+  TabSgName</a></samp>
+  <dd>is a pointer to a constant
+  <samp><a href="#tdef_T_TabSgName">T_TabSgName</a></samp>
+  structure.<br>
+  After building <samp>Sginfo.HallSymbol</samp>, the
+  <a href="sginfo_listtable.html">internal table</a>
+  of space group symbols is scanned for the
+  same Hall symbol. If there is a match, <samp>TabSgName</samp>
+  will point to the corresponding entry, otherwise <samp>TabSgName</samp>
+  will hold the <samp>NULL</samp> pointer.<br>
+  Only valid after a call to
+  <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>!
+
+<dt><samp><a name="SgInfo_CCMx_LP" href="#tdef_T_SgInfo">
+  CCMx_LP</a></samp>
+  <dd>is a pointer to a constant integer array holding the
+  &quot;change-of-centering&quot; (rotation) matrix
+  from the centred to the primitive setting.
+  In contrast to the rotation part of a &quot;<samp>CBMx</samp>&quot;
+  labeled change-of-basis matrix the factor for the elements of
+  <samp>CCMx_LP</samp> is <samp>1</samp>.
+  <br>Only valid after a call to
+  <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>!
+
+<dt><samp><a name="SgInfo_n_si_Vector" href="#tdef_T_SgInfo">
+  n_si_Vector</a></samp>
+  <dd>holds the number (range 0...3) of semi-invariant vectors and moduli
+      stored in <samp>si_Vector</samp> and <samp>si_Modulus</samp>.
+  <br>Only valid after a call to
+  <a href="#func_Set_si">Set_si()</a>!
+
+<dt><samp><a name="SgInfo_si_Vector" href="#tdef_T_SgInfo">
+  si_Vector</a></samp>
+  <dd>stores the semi-invariant vectors. The first vector is
+  si_Vector[0..2], the
+  second si_Vector[3..5], and so on.
+  <br>Only valid after a call to
+  <a href="#func_Set_si">Set_si()</a>!
+
+<dt><samp><a name="SgInfo_si_Modulus" href="#tdef_T_SgInfo">
+  si_Modulus</a></samp>
+  <dd>stores the semi-invariant moduli.
+  <br>Only valid after a call to
+  <a href="#func_Set_si">Set_si()</a>!
+
+</dl>
+
+<hr>
+<h3><a name="tdef_T_LatticeInfo" href="#sginfo_structures">T_LatticeInfo
+    </a></h3>
+<pre>
+typedef struct
+  {
+    const int  Code;
+    const int  nTrVector;
+    const int  *TrVector;
+  }
+  T_LatticeInfo;
+</pre>
+ <p><samp>T_LatticeInfo</samp> is exclusively defined to hold the data of
+    <a href="hall_symbols.html#Table_1">Table 1</a>
+    in the Hall symbol definition.
+
+ <p><samp>Code</samp> is one of the letters in column 1 of the table,
+    e.g., 'P' or 'F'. <samp>nTrVector</samp> is the corresponding entry
+    in column 2. <samp>TrVector</samp> points to an array of
+    3&nbsp;*&nbsp; <samp>nTrVector</samp> integers. The first three
+    values are always <samp>{0,0,0}</samp>, the next three values
+    denote the second lattice translation vector, mulitplied by
+    <samp><a href="#base_factors">STBF</a></samp>,
+    and so on. Since the translation parts of the Seitz matrices in
+    <samp>SgInfo.ListSeitzMx</samp> are also multiplied by
+    <samp>STBF</samp>, Seitz matrices and lattice translation
+    vectors are compatible.
+
+
+<hr>
+<h3><a name="tdef_T_RTMx" href="#sginfo_structures">T_RTMx
+    </a></h3>
+<pre>
+typedef union
+  {
+    struct { int R[9], T[3]; } s;
+    int                        a[12];
+  }
+  T_RTMx;
+</pre>
+ <p>This union is used for two types of matrices throughout
+    <strong>SgInfo</strong>, namely Seitz matrices and
+    change-of-basis matrices. For a discussion on the
+    base factors <a href=#base_factors>see above</a>.
+
+ <p>The matrix elements can be accessed in two ways:
+
+ <ul> <li><samp>RTMx.s.R[0..9]</samp> holds the rotation part<br>
+          <samp>RTMx.s.T[0..3]</samp> holds the translation part
+     </li>
+      <li><samp>RTMx.a[ 0.. 9]</samp> holds the rotation part<br>
+          <samp>RTMx.a[10..12]</samp> holds the translation part
+     </li>
+</ul>
+ <p>Sometimes it is advantageous to access the matrix elements in an
+    continuous fashion, e.g. to multiply all elements by <samp>-</samp>1,
+    sometimes it is more convenient to have separate pointers for the
+    rotation and translation parts. The definition of <samp>T_RTMx</samp>
+    allows for both.
+
+ <p>Using the ITVA &quot;augmented 4*4&nbsp;matrix&quot; notation, the mapping
+    of a position <samp>(x,y,z)</samp> to the symmetry equivalent
+    position <samp>(xs,ys,zs)</samp> by a <strong>SgInfo</strong>
+    Seitz matrix can be summerized by:
+<pre>
+        ( xs )     ( R[0]  R[1]  R[2]  T[0]/STBF )  ( x )
+        ( ys )  =  ( R[3]  R[4]  R[5]  T[1]/STBF )  ( y )
+        ( zs )     ( R[6]  R[7]  R[8]  T[2]/STBF )  ( z )
+        ( 1  )     (  0     0     0     1        )  ( 1 )
+</pre>
+ <p>The definition for <strong>SgInfo</strong> change-of-basis matrices
+    which transform the coordinates <samp>(xa,ya,za)</samp> of a position
+    in basis system&nbsp;A to coordinates <samp>(xb,yb,zb)</samp> in
+    system&nbsp;B, is:
+<pre>
+        ( xb )     ( R[0]/CRBF  R[1]/CRBF  R[2]/CRBF  T[0]/CTBF )  ( xa )
+        ( yb )  =  ( R[3]/CRBF  R[4]/CRBF  R[5]/CRBF  T[1]/CTBF )  ( ya )
+        ( zb )     ( R[6]/CRBF  R[7]/CRBF  R[8]/CRBF  T[2]/CTBF )  ( za )
+        ( 1  )     (  0          0          0          1        )  ( 1  )
+</pre>
+
+
+<hr>
+<h3><a name="tdef_T_RotMxInfo" href="#sginfo_structures">T_RotMxInfo
+    </a></h3>
+<pre>
+typedef struct
+  {
+    int  EigenVector[3];
+    int  Order;
+    int  Inverse;
+    int  RefAxis;
+    int  DirCode;
+  }
+  T_RotMxInfo;
+</pre>
+ <p><samp>T_RotMxInfo</samp> is a structure which holds the characteristics
+    of an affiliated rotation matrix. (Note: throughout <strong>SgInfo</strong>
+    there is no explicit affiliation of rotation matrices and
+    <samp>T_RotMxInfo</samp> structures. This is mainly because all
+    routines of <strong>SgInfo</strong> are intended to also work with
+    <samp>SgInfo.ListRotMxInfo = NULL</samp>.)<br>
+    The only recommended way to set a <samp>T_RotMxInfo</samp> structure
+    is a call to <a href="#func_GetRotMxInfo">GetRotMxInfo()</a>.
+
+ <dl> <dt><samp>EigenVector</samp>
+        <dd>holds the rotation axis of the
+            affiliated rotation matrix, e.g. [0,0,1] for the z-axis.
+
+      <dt><samp>Order</samp>
+        <dd>is one of <samp>{ 1,2,3,4,6,-1,-2,-3,-4,-6 }</samp> (the
+            turn angle of the rotation matrix is 360/abs(Order)).
+      <dt><samp>Inverse</samp>
+        <dd>If <samp>Inverse</samp> is <samp>0</samp>, the rotation
+            matrix has a positive turn angle (counter-clock-wise).<br>
+            If <samp>Inverse</samp> is <samp>1</samp>, the rotation
+            matrix has a negative turn angle (clock-wise).
+      <dt><samp>RefAxis</samp>
+        <dd>is one of <samp>{ o,x,y,z }</samp>.<br>
+            Note: In general <samp>RefAxis</samp> does <strong>not</strong>
+            coincide with the direction given by <samp>EigenVector</samp>.
+      <dt><samp>DirCode</samp>
+        <dd>is one of <samp>{ .,=,&quot;,',|,\,* }</samp>.
+</dl>
+ <p>The values of <samp>RefAxis</samp> and <samp>DirCode</samp>
+    form a superset of the
+    <a href="hall_symbols.html#Table_3">Hall symbol axis symbols</a>.
+    These symbols are meant to be only for <strong>SgInfo</strong>
+    internal purposes. (The definition of <samp>TabXtalRotMx</samp>
+    in <samp>sginfo.h</samp> and a look at
+    <a href="#func_GetRotMxInfo">GetRotMxInfo()</a>
+    could help to get an idea of the meanings of
+    <samp>RefAxis</samp> and <samp>DirCode</samp>.)
+
+<hr>
+<h3><a name="tdef_T_TabSgName" href="#sginfo_structures">T_TabSgName
+    </a></h3>
+<pre>
+typedef struct
+  {
+    const char  *HallSymbol;
+    const int   SgNumber;
+    const char  *Extension;
+    const char  *SgLabels;
+  }
+  T_TabSgName;
+</pre>
+ <p><samp>T_TabSgName</samp> is exclusively defined to hold the data of
+    <a href="hall_symbols.html#Table_6">Table 6</a>
+    in the Hall symbol definition. However, the data are arranged
+    in a different way. A sample entry of <samp>TabSgName</samp>
+    as defined in <samp>sginfo.h</samp> is:
+
+ <pre>
+     &quot; A 2 2 -1ac&quot;,        68, &quot;1cab&quot;,  &quot;A_b_a_a&quot;,
+</pre>
+ <p><samp>HallSymbol</samp> and <samp>SgNumber</samp> need no comment.
+    <samp>Extension</samp> is a separate string (remember, in the
+    lists of space group symbols the extension appears like
+    <samp>68:1cab</samp>). <samp>SgLabels</samp> points to the
+    Herman-Mauguin symbol(s). The symbols for the different directions
+    are separated by underscores.
+    Another <samp>TabSgName</samp> entry is:
+
+ <pre>
+     &quot; B 2&quot;,                5, &quot;c2&quot;,    &quot;C_2 = B_1_1_2 = B_2&quot;,
+</pre>
+ <p>Here we have three alternatives for the Herman-Mauguin symbol,
+    separated by &quot;&nbsp;=&nbsp;&quot;. The underscores (instead
+    of blanks) help the <samp>SgInfo</samp> routines to decide what
+    belongs a to a specific Herman-Mauguin symbol and where it ends.
+
+ <p>For most purposes there should be no need to access
+    the table entries directly.
+    See the descriptions for
+    <a href="#func_PrintTabSgNameEntry">PrintTabSgNameEntry()</a>
+    and
+    <a href="#func_PrintFullHM_SgName">PrintFullHM_SgName()</a>.
+
+<hr>
+<h3><a name="tdef_T_Eq_hkl" href="#sginfo_structures">T_Eq_hkl
+    </a></h3>
+ <pre>
+typedef struct
+  {
+    int  M;      /* Multiplicity */
+    int  N;      /* Number of equivalent hkl to follow */
+    int  h[24];  /* If hkl == 000 M = N = 1 */
+    int  k[24];  /* If hkl != 000 M = 2 * N */
+    int  l[24];  /* List of hkl does not contain friedel mates */
+    int  TH[24]; /* Phase shift relative to h[0], k[0], l[0] */
+  }
+  T_Eq_hkl;
+</pre>
+<p>For more information see the description of
+   <a href="#func_BuildEq_hkl">BuildEq_hkl()</a>.
+
+<hr>
+<h2><a name="sginfo_functions" href="#head">
+    SgInfo functions</a></h2>
+
+<p>Functions marked with &quot;@&quot; are less
+   important to the &quot;end user&quot;. Unless you don't
+   want to add functions to the library you're not going to
+   miss anything if you skip the marked entries.
+
+<ul>
+  <li><a name="func_sgclib_c"></a>
+      functions defined in <samp>sgclib.c</samp>
+  <ul>
+    <li><a href="#func_SetSgError">SetSgError() @</a>
+    <li><a href="#func_iModPositive">iModPositive()</a>
+    <li><a href="#func_traceRotMx">traceRotMx() @</a>
+    <li><a href="#func_deterRotMx">deterRotMx() @</a>
+    <li><a href="#func_RotMx_t_Vector">RotMx_t_Vector()</a>
+    <li><a href="#func_RotMxMultiply">RotMxMultiply()</a>
+    <li><a href="#func_RotateRotMx">RotateRotMx() @</a>
+    <li><a href="#func_SeitzMxMultiply">SeitzMxMultiply()</a>
+    <li><a href="#func_RTMxMultiply">RTMxMultiply()</a>
+    <li><a href="#func_InverseRotMx">InverseRotMx()</a>
+    <li><a href="#func_InverseRTMx">InverseRTMx()</a>
+    <li><a href="#func_IsSMxTransl0">IsSMxTransl0() @</a>
+    <li><a href="#func_CompareSeitzMx">CompareSeitzMx() @</a>
+    <li><a href="#func_GetRotMxOrder">GetRotMxOrder() @</a>
+    <li><a href="#func_GetRotMxInfo">GetRotMxInfo() @</a>
+    <li><a href="#func_ListOrBufRotMxInfo">ListOrBufRotMxInfo() @</a>
+    <li><a href="#func_Add2ListSeitzMx">Add2ListSeitzMx()</a>
+    <li><a href="#func_AddInversion2ListSeitzMx">AddInversion2ListSeitzMx()</a>
+    <li><a href="#func_AddLatticeTr2ListSeitzMx">AddLatticeTr2ListSeitzMx()</a>
+    <li><a href="#func_ApplyOriginShift">ApplyOriginShift() @</a>
+    <li><a href="#func_FindSeitzMx">FindSeitzMx() @</a>
+    <li><a href="#func_InitSgInfo">InitSgInfo()</a>
+    <li><a href="#func_CompleteSgInfo">CompleteSgInfo()</a>
+    <li><a href="#func_CB_SMx">CB_SMx() @</a>
+    <li><a href="#func_TransformSgInfo">TransformSgInfo()</a>
+  </ul>
+  <li><a name="func_sgio_c"></a>
+      functions defined in <samp>sgio.c</samp>
+  <ul>
+    <li><a href="#func_FindTabSgNameEntry">FindTabSgNameEntry()</a>
+    <li><a href="#func_SgID_Number">SgID_Number()</a>
+    <li><a href="#func_ParseSymXYZ">ParseSymXYZ()</a>
+    <li><a href="#func_ParseHallSymbol">ParseHallSymbol()</a>
+    <li><a href="#func_PrintFullHM_SgName">PrintFullHM_SgName()</a>
+    <li><a href="#func_PrintTabSgNameEntry">PrintTabSgNameEntry()</a>
+    <li><a href="#func_FormatFraction">FormatFraction()</a>
+    <li><a href="#func_RTMx2XYZ">RTMx2XYZ()</a>
+    <li><a href="#func_PrintMapleRTMx">PrintMapleRTMx()</a>
+    <li><a href="#func_ListSgInfo">ListSgInfo()</a>
+  </ul>
+  <li><a name="func_sgfind_c"></a>
+      functions defined in <samp>sgfind.c</samp>
+  <ul>
+    <li><a href="#func_FindReferenceSpaceGroup">FindReferenceSpaceGroup()</a>
+  </ul>
+  <li><a name="func_sghkl_c"></a>
+      functions defined in <samp>sghkl.c</samp>
+  <ul>
+    <li><a href="#func_IsSysAbsent_hkl">IsSysAbsent_hkl()</a>
+    <li><a href="#func_BuildEq_hkl">BuildEq_hkl()</a>
+    <li><a href="#func_AreSymEquivalent_hkl">AreSymEquivalent_hkl()</a>
+    <li><a href="#func_SetListMin_hkl">SetListMin_hkl()</a>
+    <li><a href="#func_IsSuppressed_hkl">IsSuppressed_hkl()</a>
+  </ul>
+  <li><a name="func_sgsi_c"></a>
+      functions defined in <samp>sgsi.c</samp>
+  <ul>
+    <li><a href="#func_Is_si">Is_si()</a>
+    <li><a href="#func_Set_si">Set_si()</a>
+    <li><a href="#func_Set_uvw">Set_uvw()</a>
+  </ul>
+</ul>
+
+<hr>
+<a name="func_SetSgError"></a>
+ <pre>
+void <a href="#func_sgclib_c">SetSgError</a>(const char *msg);
+
+@
+</pre>
+<p>This function is used to set the global <samp>SgError</samp> variable.
+   <samp>SgError</samp> will only be set if it is <samp>NULL</samp>.
+   Successive calls to <samp>SetSgError()</samp> without clearing
+   <samp>SgError</samp> (setting <samp>SgError</samp> to <samp>NULL</samp>)
+   will preserve the first error message.
+<p>Example:
+ <pre>
+        SetSgError("Internal Error: This should never happen");
+</pre>
+
+<hr>
+<a name="func_iModPositive"></a>
+<pre>
+int <a href="#func_sgclib_c">iModPositive</a>(int ix, int iy);
+</pre>
+<p>If <samp>iy</samp>&nbsp;&gt;&nbsp;<samp>0</samp>, this function returns
+   <samp>ix&nbsp;%&nbsp;iy</samp> if <samp>ix</samp> is positive, and
+   <samp>ix&nbsp;%&nbsp;iy&nbsp;+&nbsp;iy</samp> if <samp>ix</samp> is
+   negative. Therefore the result will always be a positive integer
+   in the range <samp>[0...(iy-1)]</samp>.
+<p>Example:
+ <pre>
+        <a href="sginfo_loop_symops.html#iModPositive">SMx.s.T[i] = iModPositive(f * lsmx-&gt;s.T[i] + TrV[i], STBF);</a>
+</pre>
+
+<hr>
+<a name="func_traceRotMx"></a>
+<pre>
+int <a href="#func_sgclib_c">traceRotMx</a>(const int *RotMx);
+
+@
+</pre>
+<p><samp>traceRotMx()</samp> returns the sum of the diagonal elements
+   of <samp>RotMx</samp>, i.e.,
+   <samp>RotMx[0]&nbsp;+&nbsp;RotMx[4]&nbsp;+&nbsp;RotMx[8]</samp>.
+<p>Example:
+ <pre>
+        trace = traceRotMx(SeitzMx.s.R);
+</pre>
+
+<hr>
+<a name="func_deterRotMx"></a>
+<pre>
+int <a href="#func_sgclib_c">deterRotMx</a>(const int *RotMx);
+
+@
+</pre>
+ <p><samp>deterRotMx()</samp> returns the determinant of <samp>RotMx</samp>.
+<p>Example:
+ <pre>
+        deter = deterRotMx(SeitzMx.s.R);
+</pre>
+
+<hr>
+<a name="func_RotMx_t_Vector"></a>
+<pre>
+void <a href="#func_sgclib_c">RotMx_t_Vector</a>(int *R_t_V, const int *RotMx, const int *Vector,
+                    int FacTr);
+</pre>
+<p>&quot;Rotation matrix times vector&quot; computes the matrix product:
+<pre>
+        ( R_t_V[0] )     ( RotMx[0]  RotMx[1]  RotMx[2] )  ( Vector[0] )
+        ( R_t_V[1] )  =  ( RotMx[3]  RotMx[4]  RotMx[5] )  ( Vector[1] )
+        ( R_t_V[2] )     ( RotMx[6]  RotMx[7]  RotMx[8] )  ( Vector[2] )
+</pre>
+<p>In addition, if <samp>FacTr</samp>&nbsp;&gt;&nbsp;<samp>0</samp>,
+   <samp><a href="#func_iModPositive">iModPositive(R_t_V[i], FacTr)</a></samp>
+   will be called for <samp>i=0...2</samp>.
+<p>Caveat: <samp>R_t_V</samp> and <samp>Vector</samp> may <strong>not</strong>
+           point to the same memory area.
+<p>Example:
+ <pre>
+        int  RV[3], RotMx[9], V[3];
+        ...
+        RotMx_t_Vector(RV, RotMx, V, <a href="#base_factors">STBF</a>);
+</pre>
+
+<hr>
+<a name="func_RotMxMultiply"></a>
+<pre>
+void <a href="#func_sgclib_c">RotMxMultiply</a>(int *rmxab, const int *rmxa, const int *rmxb);
+</pre>
+<p><samp>RotMxMultiply()</samp> computes the matrix product
+   <samp>rmxab&nbsp;=&nbsp;rmxa&nbsp;*&nbsp;rmxb</samp>.
+<p>Caveat: <samp>rmxab</samp> and <samp>rmxa</samp> or <samp>rmxb</samp>
+           may <strong>not</strong> point to the same memory area.
+<p>Example:
+ <pre>
+        int  RAB[9], RA[9], RB[9];
+        ...
+        RotMxMultiply(RAB, RA, RB);
+</pre>
+
+<hr>
+<a name="func_RotateRotMx"></a>
+<pre>
+void <a href="#func_sgclib_c">RotateRotMx</a>(int *RotMx, const int *RMx, const int *InvRMx);
+
+@
+</pre>
+<p><samp>RotateRotMx</samp> computes the double matrix product
+   <samp>RotMx&nbsp;=&nbsp;RMx&nbsp;*&nbsp;RotMx&nbsp;*&nbsp;InvRMx</samp>.
+   This function is used to, e.g., transform a two-fold symmetry operation
+   parallel&nbsp;<em>z</em> to a two-fold symmetry operation
+   parallel&nbsp;<em>x</em>. E.g. <samp>GetRotMxInfo()</samp> makes use of
+   <samp>RotateRotMx()</samp> to generate all allowed crystallographic
+   rotation operations by applying appropriate transformation matrices to the
+   rotation matrices tabulated in <samp>TabXtalRotMx</samp>, defined
+   in <samp>sginfo.h</samp>.
+<p>Example:
+ <pre>
+        int  RotMx[9], T[9], InvT[9];
+        ...
+        RotRotMx(RotMx, T, InvT);
+</pre>
+
+<hr>
+<a name="func_SeitzMxMultiply"></a>
+<pre>
+void <a href="#func_sgclib_c">SeitzMxMultiply</a>(T_RTMx *smxab,
+                     const T_RTMx *smxa, const T_RTMx *smxb);
+</pre>
+<p><samp>SeitzMxMultiply()</samp> computes the matrix product
+   <samp>smxab&nbsp;=&nbsp;smxa&nbsp;*&nbsp;smxb</samp>.
+<p>Caveat: <samp>smxab</samp> and <samp>smxa</samp> or <samp>smxb</samp>
+           may <strong>not</strong> point to the same memory area.
+<p>In addition, <samp>
+   <a href="#func_iModPositive">iModPositive(smxab-&gt;s.T[i], STBF)</a></samp>
+   will be called for <samp>i=0...2</samp>. I.e., the translation
+   components of <samp>smxab</samp> are guaranteed to be in the range
+   <samp>[0...(<a href="#base_factors">STBF</a>-1)]</samp>.
+
+<p>Example:
+ <pre>
+        T_RTMx  SAB, SA, SB;
+        ...
+        SeitzMxMultiply(&amp;SAB, &amp;SA, &amp;SB);
+</pre>
+
+<hr>
+<a name="func_RTMxMultiply"></a>
+<pre>
+void <a href="#func_sgclib_c">RTMxMultiply</a>(T_RTMx *rtmxab, const T_RTMx *rtmxa, const T_RTMx *rtmxb,
+                  int FacAug, int FacTr);
+</pre>
+<p><samp>RTMxMultiply()</samp> computes the matrix product
+   <samp>rtmxab&nbsp;=&nbsp;rtmxa&nbsp;*&nbsp;rtmxb</samp>.
+   The translation components of <samp>rtmxa</samp> are multiplied by
+   <samp>FacAug</samp> before they are used in the calculation. This
+   allows for easy multiplication of matrices with different rotation
+   and/or translation base factors. (Using the 4x4 augmented matrix notation,
+   the bottom line of <samp>rtmxb</samp> would read
+   <samp>(0 0 0 FacAug)</samp>.
+   Hence the name &quot;<samp>FacAug</samp>&quot;.)
+<p>Caveat: <samp>rtmxab</samp> and <samp>rtmxa</samp> or <samp>rtmxb</samp>
+           may <strong>not</strong> point to the same memory area.
+<p>In addition, if <samp>FacTr</samp>&nbsp;&gt;&nbsp;<samp>0</samp><samp>,
+   <a href="#func_iModPositive">iModPositive(rtmxab-&gt;s.T[i], FacTr)</a></samp>
+   will be called for <samp>i=0...2</samp>. I.e., the translation
+   components of <samp>rtmxab</samp> are then guaranteed to be in the range
+   <samp>[0...(FacTr-1)]</samp>.
+
+<p>Example:
+ <pre>
+        T_RTMx  RTAB, RTA, RTB;
+        ...
+        RTMxMultiply(&amp;RTAB, &amp;RTA, &amp;RTB);
+</pre>
+
+<hr>
+<a name="func_InverseRotMx"></a>
+<pre>
+void <a href="#func_sgclib_c">InverseRotMx</a>(const int *RotMx, int *InvRotMx);
+</pre>
+<p><samp>InverseRotMx()</samp> computes the inverse of the <samp>RotMx</samp>
+   3x3 rotation matrix, multiplied by the determinant of <samp>RotMx</samp>,
+   and stores the result in <samp>InvRotMx</samp>.<br>
+   (Speaking more correctly:
+   <samp>InverseRotMx()</samp> computes the inverse of <samp>RotMx</samp>,
+   <em>not divided</em> by the determinant of <samp>RotMx</samp>.)
+<p>Caveat: <samp>RotMx</samp> and <samp>InvRotMx</samp> may
+   <strong>not</strong> point to the same memory area.
+<p>Example:
+ <pre>
+        int  R[9], InvR[9];
+        ...
+        InverseRotMx(R, InvR);
+</pre>
+
+<hr>
+<a name="func_InverseRTMx"></a>
+<pre>
+void <a href="#func_sgclib_c">InverseRTMx</a>(const T_RTMx *RTMx, T_RTMx *InvRTMx);
+</pre>
+<p><samp>InverseRTMx()</samp> computes the inverse of <samp>RTMx</samp>,
+   multiplied by the determinant of <samp>RTMx-&gt;s.R</samp>,
+   and stores the result in <samp>InvRTMx</samp>.<br>
+   (Speaking more correctly:
+   <samp>InverseRTMx()</samp> computes the inverse of <samp>RTMx</samp>,
+   <em>not divided</em> by the determinant of <samp>RTMx-&gt;s.R</samp>.)
+<p>Caveat: <samp>RTMx</samp> and <samp>InvRTMx</samp> may
+   <strong>not</strong> point to the same memory area.
+<p>Example:
+ <pre>
+        T_RTMx  RT, InvRT;
+        ...
+        InverseRTMx(&amp;RT, &amp;InvRT);
+</pre>
+
+<hr>
+<a name="func_IsSMxTransl0"></a>
+ <pre>
+int <a href="#func_sgclib_c">IsSMxTransl0</a>(const T_LatticeInfo *LatticeInfo, const int *SeitzMxT);
+
+@
+</pre>
+<p>If <samp>SeitzMxT&nbsp;=&nbsp;0&nbsp;mod&nbsp;<a href="#base_factors">STBF</a></samp>
+   after addition of one of the
+   lattice translation vectors stored in <samp>LatticeInfo-&gt;TrVector</samp>,
+   <samp>IsSMxTransl0()</samp> returns <samp>1</samp>; otherwise
+   <samp>IsSMxTransl0()</samp> returns <samp>0</samp>.
+<p>Example:
+ <pre>
+        const T_LatticeInfo  *LatticeInfo;
+        T_RTMx               SeitzMx;
+        int                  Tr0;
+        ...
+        Tr0 = IsSMxTransl0(LatticeInfo, SeitzMx.s.T);
+</pre>
+
+<hr>
+<a name="func_CompareSeitzMx"></a>
+<pre>
+int <a href="#func_sgclib_c">CompareSeitzMx</a>(const T_LatticeInfo *LatticeInfo,
+                   const T_RTMx *SeitzMxA, const T_RTMx *SeitzMxB);
+@
+</pre>
+<p>If the rotation matrices <samp>SeitzMxA-&gt;s.R</samp>
+   and <samp>SeitzMxB-&gt;s.R</samp> are equal, and if
+   <samp>SeitzMxA-&gt;s.T&nbsp;-&nbsp;SeitzMxB-&gt;s.T&nbsp;=&nbsp;0&nbsp;mod&nbsp;<a href="#base_factors">STBF</a></samp>
+   after addition of one of the lattice translation
+   vectors stored in <samp>LatticeInfo-&gt;TrVector</samp>,
+   <samp>CompareSeitzMx()</samp> returns <samp>0</samp>; otherwise
+   <samp>CompareSeitzMx()</samp> returns <samp>-1</samp>.
+<p>Example:
+ <pre>
+        const T_LatticeInfo  *LatticeInfo;
+        T_RTMx               SA, SB;
+        int                  CmpResult;
+        ...
+        CmpResult = CompareSeitzMx(LatticeInfo, &amp;SA, &amp;SB);
+</pre>
+
+<hr>
+<a name="func_GetRotMxOrder"></a>
+<pre>
+int <a href="#func_sgclib_c">GetRotMxOrder</a>(const int *RotMx);
+
+@
+</pre>
+<p><samp>GetRotMxOrder()</samp> returns the rotational order of the
+   <samp>RotMx</samp> 3x3 rotation matrix, i.e. one of
+   <samp>{&nbsp;1,2,3,4,6,-1,-2,-3,-4,-6&nbsp;}</samp>
+   (the turn angle of the rotation matrix is 360/abs(Order)).<br>
+   If <samp>GetRotMxOrder()</samp> returns <samp>0</samp>,
+   <samp>RotMx</samp> is not a
+   <a href="#legal_matrices">legal</a>
+   <strong>SgInfo</strong> rotation matrix,
+   or not a rotation matrix at all.<br>
+   The return value is obtained by evaluation of the trace and the
+   determinant of <samp>RotMx</samp>
+   (see e.g. Boisen &amp; Gibbs <a href="sginfo.html#ref2">[2]</a>).
+<p>Example:
+ <pre>
+        int  R[9], Order;
+        ...
+        Order = GetRotMxOrder(R);
+</pre>
+
+<hr>
+<a name="func_GetRotMxInfo"></a>
+<pre>
+int <a href="#func_sgclib_c">GetRotMxInfo</a>(const int *RotMx, T_RotMxInfo *RotMxInfo);
+
+@
+</pre>
+<p><samp>GetRotMxInfo()</samp> sets the <samp>RotMxInfo</samp> structure
+   (see the description of
+   <samp><a href="#tdef_T_RotMxInfo">T_RotMxInfo</a></samp>)
+   for the <samp>RotMx</samp> 3x3 rotation matrix.
+   <samp>GetRotMxInfo()</samp> returns the rotational order of
+   <samp>RotMx</samp>
+   (see <samp><a href="#func_GetRotMxOrder">GetRotMxOrder()</a></samp>).
+<p>Example:
+ <pre>
+        int          R[9], Order;
+        T_RotMxInfo  RMxI;
+        ...
+        Order = GetRotMxInfo(R, &amp;RMxI);
+</pre>
+
+<hr>
+<a name="func_ListOrBufRotMxInfo"></a>
+<pre>
+const T_RotMxInfo <a href="#func_sgclib_c">*ListOrBufRotMxInfo</a>(const T_SgInfo *SgInfo, int iList,
+                                      T_RotMxInfo *BufRotMxInfo);
+@
+</pre>
+<p>If
+   <samp><a href="#tdef_T_SgInfo">SgInfo</a></samp><samp>-&gt;ListRotMxInfo&nbsp;!=&nbsp;NULL</samp>,
+   <samp>ListOrBufRotMxInfo()</samp> returns a pointer
+   to the <samp>iList</samp>'th
+   element of <samp>Sginfo-&gt;ListRotMxInfo</samp>.<br>
+   If <samp>SgInfo-&gt;ListRotMxInfo == NULL</samp>,
+   <samp>ListOrBufRotMxInfo()</samp> calls<br>
+   <samp><a href="#func_GetRotMxInfo">
+   GetRotMxInfo(SgInfo-&gt;ListSeitzMx[iList].s.R, BufRotMxInfo)</a></samp><br>
+   and returns <samp>BufRotMxInfo</samp>.<br>
+   If <samp>ListOrBufRotMxInfo()</samp> returns <samp>NULL</samp>,
+   the <samp>iList</samp>'th element of
+   <samp>SgInfo-&gt;ListSeitzMx</samp> is not a
+   <a href="#legal_matrices">legal</a>
+   <strong>Sginfo</strong>
+   Seitz matrix, and <samp>SgError</samp> is set.
+<p>Example:
+ <pre>
+        T_SgInfo     SgInfo;
+        int          iList;
+        T_RotMxInfo  BufRMxI, *RMxI;
+        ...
+        RMxI = ListOrBufRotMxInfo(&amp;SgInfo, iList, &amp;BufRMxI);
+</pre>
+
+<hr>
+<a name="func_Add2ListSeitzMx"></a>
+<pre>
+int <a href="#func_sgclib_c">Add2ListSeitzMx</a>(T_SgInfo *SgInfo, const T_RTMx *NewSMx);
+</pre>
+<p><samp>Add2ListSeitzMx()</samp> adds the Seitz matrix <samp>NewSMx</samp> to
+   <samp><a href="#tdef_T_SgInfo">SgInfo</a></samp><samp>-&gt;ListSeitzMx</samp> if
+   <samp>NewSMx</samp> is not already in the list and
+   <samp>NewSMx</samp> is a
+   <a href="#legal_matrices">legal</a>
+   <strong>SgInfo</strong> Seitz matrix.<br>
+   If <samp>SgInfo-&gt;ListSeitzMx</samp> is empty,
+   <samp>Add2ListSeitzMx()</samp> will insert the identity
+   operation before inserting <samp>NewSMx</samp>; i.e.,
+   <samp>Add2ListSeitzMx()</samp> guarantees that
+   <samp>SgInfo-&gt;ListSeitzMx[0]</samp> will always be the
+   identity operation.<br>
+   If <samp>SgInfo-&gt;ListRotMxInfo != NULL</samp>,
+   <samp>Add2ListSeitzMx()</samp> will also set the appropriate
+   <samp>ListRotMxInfo</samp> entry.
+<p>The behaviour of <samp>Add2ListSeitzMx()</samp>
+   depends on the value of <samp>SgInfo-&gt;GenOption</samp>:
+ <dl>
+   <dt><samp>GenOption ==&nbsp;&nbsp;0</samp>
+     <dd>Full group generation, this is the recommended setting.<br>
+         <samp>Add2ListSeitzMx()</samp> will multiply the new
+         Seitz matrices with any Seitz matrix already in the list.
+         If the result of a multiplication is again a new Seitz
+         matrix, <samp>Add2ListSeitzMx()</samp> will add this
+         matrix, too, and also start the multiplication loop.
+         This process continues until no further Seitz matrices are
+         obtained.<br>
+         Finally <samp>SgInfo-&gt;ListSeitzMx</samp> will contain the whole
+         set of symmetry operations, including lattice translation
+         operations and the inversion operation at the origin, if
+         present.<br>
+         Using <samp>GenOption&nbsp;==&nbsp0</samp> is the <em>only</em>
+         way to ensure, that the Seitz matrices passed to
+         <samp>Add2ListSeitzMx()</samp> actually form a closed group.
+   <dt><samp>GenOption ==&nbsp;&nbsp;1</samp>
+     <dd>Trusted: set <samp>Centric/InversionOffOrigin/LatticeInfo</samp>
+         only.<br>
+         This mode is used to translate the &quot;well-known&quot;
+         Hall symbols of the
+         <a href="sginfo_listtable.html">internal list</a>
+         of space group symbols. Any other use of this mode is
+         discouraged.<br>
+         <samp>Add2ListSeitzMx()</samp> will not include lattice
+         translation operations and the inversion operation at the
+         origin into <samp>SgInfo-&gt;ListSeitzMx</samp>, but will only set
+         <samp>SgInfo-&gt;Centric</samp> or
+         <samp>SgInfo-&gt;InversionOffOrigin</samp>
+         and <samp>SgInfo-&gt;LatticeInfo</samp>, thereby reducing the
+         time needed for group generation.
+   <dt><samp>GenOption ==&nbsp;-1</samp>
+     <dd>No group generation.<br>
+         This mode is used by the space group finding functions to
+         translate the Hall symbols of the
+         <a href="sginfo_listtable.html">internal list</a>
+         to generator matrices.<br>
+         <samp>Add2ListSeitzMx()</samp> will only add <samp>NewSMx</samp>,
+         but not include lattice
+         translation operations and the inversion operation at the
+         origin. Like for <samp>GenOption&nbsp;==&nbsp1</samp>, only
+         <samp>SgInfo-&gt;Centric</samp> or
+         <samp>SgInfo-&gt;InversionOffOrigin</samp>
+         and <samp>SgInfo-&gt;LatticeInfo</samp> will be set.
+</dl>
+ <dl>
+  <dt><samp>Add2ListSeitzMx()</samp> returns:
+    <dd><samp>&nbsp;1</samp>, if <samp>NewSMx</samp> has actually been added
+        to <samp>Sginfo-&gt;ListSeitzMx</samp>.
+    <dd><samp>&nbsp;0</samp>, if <samp>NewSMx</samp> was already in the list.
+    <dd><samp>-1</samp>, if an error occurred. In this case
+        <samp>SgError</samp> points to the error message.
+</dl>
+<p>Example:
+ <pre>
+        int       Result;
+        T_SgInfo  SgInfo;
+        T_RTMx    SMx;
+        ...
+        Result = Add2ListSeitzMx(&amp;SgInfo, &amp;SMx);
+</pre>
+
+<hr>
+<a name="func_AddInversion2ListSeitzMx"></a>
+ <pre>
+int <a href="#func_sgclib_c">AddInversion2ListSeitzMx</a>(T_SgInfo *SgInfo);
+</pre>
+<p><samp>AddInversion2ListSeitzMx()</samp> sets up a buffer Seitz matrix
+   with the inversion operation at the origin and adds this matrix to
+   <samp><a href="#tdef_T_SgInfo">SgInfo</a></samp><samp>-&gt;ListSeitzMx</samp>
+   via a call to
+   <a href="#func_Add2ListSeitzMx">Add2ListSeitzMx()</a>.<br>
+   This is the recommended way to add the inversion operation. Setting
+   <samp>Sginfo-&gt;Centric</samp> directly is discouraged.
+ <dl>
+  <dt><samp>AddInversion2ListSeitzMx()</samp> returns:
+    <dd><samp>&nbsp;1</samp>, if the inversion matrix has actually been added
+        to <samp>Sginfo-&gt;ListSeitzMx</samp>.
+    <dd><samp>&nbsp;0</samp>, if the inversion matrix was already in the list.
+    <dd><samp>-1</samp>, if an error occurred. In this case
+        <samp>SgError</samp> points to the error message.
+</dl>
+<p>Example:
+ <pre>
+        int       Result;
+        T_SgInfo  SgInfo;
+        ...
+        Result = AddInversion2ListSeitzMx(&amp;SgInfo);
+</pre>
+
+<hr>
+<a name="func_AddLatticeTr2ListSeitzMx"></a>
+<pre>
+int <a href="#func_sgclib_c">AddLatticeTr2ListSeitzMx</a>(T_SgInfo *SgInfo,
+                             const T_LatticeInfo *LatticeInfo);
+</pre>
+<p>For each lattice translation vector of
+   <samp><a href="#tdef_T_LatticeInfo">LatticeInfo</a></samp>,
+   <samp>AddLatticeTr2ListSeitzMx()</samp>
+   sets up a buffer Seitz matrix with the rotation part being the
+   identity matrix, and adds this Seitz matrix to
+   <samp><a href="#tdef_T_SgInfo">SgInfo</a></samp><samp>-&gt;ListSeitzMx</samp>
+   via a call to
+   <a href="#func_Add2ListSeitzMx">Add2ListSeitzMx()</a>.<br>
+   This is the recommended way to introduce lattice translations.
+   Setting
+   <samp>Sginfo-&gt;LatticeInfo</samp> directly is discouraged.
+ <dl>
+  <dt><samp>AddLatticeTr2ListSeitzMx()</samp> returns:
+    <dd><samp>&nbsp;0</samp>, if no error occurred.
+    <dd><samp>-1</samp>, if an error occurred. In this case
+        <samp>SgError</samp> points to the error message.
+</dl>
+<p>Example:
+ <pre>
+        int                  Result;
+        T_SgInfo             SgInfo;
+        const T_LatticeInfo  *LatticeInfo;
+        ...
+        Result = AddLatticeTr2ListSeitzMx(&amp;SgInfo, LatticeInfo);
+</pre>
+
+<hr>
+<a name="func_ApplyOriginShift"></a>
+<pre>
+int <a href="#func_sgclib_c">ApplyOriginShift</a>(T_SgInfo *SgInfo);
+
+@
+</pre>
+<p><samp>ApplyOriginShift()</samp>
+   <ul> <li>applies the orgin shift vector stored in
+            <samp><a href="#SgInfo_OriginShift">SgInfo-&gt;OriginShift</a></samp>
+            to the Seitz matrices stored in
+            <samp>SgInfo-&gt;ListSeitzMx</samp>.
+        <li>is meant to be only for SgInfo internal usage.
+        <li>is called by
+            <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>;
+            hence it is an <em>error</em> to call
+            <samp>ApplyOriginShift()</samp>
+            prior to or after a call to <samp>CompleteSgInfo()</samp>.
+        <li>will <em>not</em> set
+            <samp>SgInfo-&gt;OriginShift</samp> to <samp>(0,0,0)</samp>.
+  </ul>
+<p>Note that - if the origin shift vector is different
+   from <samp>(0,0,0)</samp> - an inversion operation at the
+   origin becomes an inversion off origin. The other way round,
+   an inversion off origin <em>can</em> become an inversion at the origin.
+   <samp>ApplyOriginShift()</samp> partly keeps track of this;
+   only <samp>CompleteSgInfo()</samp> ensures that
+   <samp>SgInfo-&gt;Centric</samp> and
+   <samp>SgInfo-&gt;InversionOffOrigin</samp> are correct.
+ <dl>
+  <dt><samp>ApplyOriginShift()</samp> returns:
+    <dd><samp>&nbsp;1</samp>, if a non <samp>(0,0,0)</samp> shift was
+                              successfully applied.
+    <dd><samp>&nbsp;0</samp>, if the shift is  <samp>(0,0,0)</samp>.
+    <dd><samp>-1</samp>, if an error occurred. In this case
+        <samp>SgError</samp> points to the error message.
+</dl>
+<p>Example:
+ <pre>
+        int       Result;
+        T_SgInfo  SgInfo;
+        ...
+        Result = ApplyOriginShift(&amp;SgInfo);
+</pre>
+
+<hr>
+<a name="func_FindSeitzMx"></a>
+<pre>
+int <a href="#func_sgclib_c">FindSeitzMx</a>(const T_SgInfo *SgInfo,
+                int Order, int HonorSign, int RefAxis, int DirCode);
+@
+</pre>
+<p><samp>FindSeitzMx()</samp> scans
+   <samp><a href="#tdef_T_SgInfo">SgInfo</a></samp><samp>-&gt;ListSeitzMx</samp>
+   for a matrix with rotational order <samp>Order</samp>
+   if <samp>HonorSign</samp> is <samp>1</samp>, or,
+   if <samp>HonorSign</samp> is <samp>0</samp>,
+   <samp>Order</samp> or <samp>-Order</samp>. Furthermore, if one or
+   both of <samp>RefAxis</samp>
+   and <samp>DirCode</samp>
+   (see <samp><a href="#tdef_T_RotMxInfo">T_RotMxInfo</a></samp>)
+   is not <samp>0</samp>, these have to match, too.
+<p><samp>FindSeitzMx()</samp> returns the index of the first matching
+   Seitz matrix. If there is no match, <samp>-1</samp> is returned.
+<p>Example:
+ <pre>
+        int       iList;
+        T_SgInfo  SgInfo;
+        ...
+        iList = FindSeitzMx(&amp;SgInfo, 4, 0, 0, '=');
+</pre>
+
+<hr>
+<a name="func_InitSgInfo"></a>
+<pre>
+void <a href="#func_sgclib_c">InitSgInfo</a>(T_SgInfo *SgInfo);
+</pre>
+<p><samp>InitSgInfo()</samp> initializes (resets) all members
+   of <samp><a href="#tdef_T_SgInfo">SgInfo</a></samp>,
+   but not <samp>SgInfo-&gt;MaxList</samp>,
+   <samp>SgInfo-&gt;ListSeitzMx</samp>, and
+   <samp>SgInfo-&gt;ListRotMxInfo</samp>.
+<p>Prior to the first call to <samp>InitSgInfo()</samp>,
+   <samp>MaxList</samp> has to be set, followed by memory allocation
+   for <samp>ListSeitzMx</samp> and <samp>ListRotMxInfo</samp>.<br>
+   It is also possible to set
+   <samp>SgInfo-&gt;ListRotMxInfo&nbsp;=&nbsp;NULL;</samp>.
+   All functions of SgInfo will still work, though less fast.
+<p>The recommended value for <samp>MaxList</samp> is <samp>192</samp>,
+   the maximum number of symmetry operations for all space groups.
+<p>Example:
+ <pre>
+        T_SgInfo  SgInfo;
+        ...
+        SgInfo.MaxList       = 192;
+        SgInfo.ListSeitzMx   = malloc(...);
+        SgInfo.ListRotMxInfo = malloc(...);
+        InitSgInfo(&amp;SgInfo);
+</pre>
+
+<hr>
+<a name="func_CompleteSgInfo"></a>
+<pre>
+int <a href="#func_sgclib_c">CompleteSgInfo</a>(T_SgInfo *SgInfo);
+</pre>
+<p><samp>CompleteSgInfo()</samp> applies the origin shift vector
+   stored in <samp>Sginfo-&gt;OriginShift</samp>,
+   reduces SgInfo-&gt;ListSeitzMx to the acentric, primitive subgroup,
+   sorts the list,
+   and updates all members of
+   <samp><a href="#tdef_T_SgInfo">SgInfo</a></samp>, but not
+   <samp>SgInfo-&gt;n_si_Vector</samp>,
+   <samp>SgInfo-&gt;si_Vector</samp>, and
+   <samp>SgInfo-&gt;si_Modulus</samp>
+   (these are set by calling
+   <a href="#func_Set_si">Set_si()</a>).
+<p><samp>CompleteSgInfo()</samp> returns <samp>0</samp> if no error occured,
+   and <samp>-1</samp> otherwise. In the latter case <samp>SgError</samp>
+   points to the error message.
+<p>Example:
+ <pre>
+        int       Result;
+        T_SgInfo  SgInfo;
+        ...
+        Result = CompleteSgInfo(&amp;SgInfo);
+</pre>
+
+<hr>
+<a name="func_CB_SMx"></a>
+<pre>
+int <a href="#func_sgclib_c">CB_SMx</a>(T_RTMx *CSiC,
+           const T_RTMx *CBMx, const T_RTMx *SMx, const T_RTMx *InvCBMx);
+@
+</pre>
+<p><samp>CB_SMx()</samp> (&quot;Change-of-Basis for Seitz Matrix&quot;)
+   computes the double matrix product:
+ <pre>
+        CSiC = CBMx * SMx * InvCBMx
+</pre>
+<p>For a discussion on basis transformations of symmetry operations
+   see, e.g., Boisen &amp; Gibbs <a href="sginfo.html#ref2">[2]</a>.
+<p>Note: <samp>CSiC</samp> and <samp>SMX</samp> may point to
+         the same memory location.
+<p><samp>CB_SMx()</samp> returns <samp>0</samp> if no error occured,
+   and <samp>-1</samp> otherwise. In the latter case <samp>SgError</samp>
+   points to the error message.
+<p>Example:
+ <pre>
+        int     Result;
+        T_RTMx  SMx, TfSMx;
+        R_RTMx  CBMx, InvCBMx;
+        ...
+        Result = CB_SMx(&amp;TfSMx, &amp;CBMx, &amp;SMx, &amp;InvCBMx);
+</pre>
+
+<hr>
+<a name="func_TransformSgInfo"></a>
+<pre>
+int <a href="#func_sgclib_c">TransformSgInfo</a>(const T_SgInfo *SgInfo,
+                    const T_RTMx *CBMx, const T_RTMx *InvCBMx,
+                    T_SgInfo *BC_SgInfo);
+</pre>
+<p><samp>TransformSgInfo()</samp> generates the full group for
+   <samp><a href="#tdef_T_SgInfo">SgInfo</a></samp>,
+   transforms each Seitz matrix by calling
+   <a href="#func_CB_SMx">CB_SMx()</a>, followed by a call to
+   <a href="#func_Add2ListSeitzMx">Add2ListSeitzMx()</a> for
+   <samp>BC_SgInfo</samp>.<br>
+   Before calling <samp>TransformSgInfo()</samp>,
+   <a href="#func_InitSgInfo">InitSgInfo()</a>
+   has to be called for <samp>BC_SgInfo</samp>. Afterwards
+   <a href="#func_CompleteSgInfo">CompleteSgInfo()</a>
+   has to be called.
+<p><samp>TransformSgInfo()</samp> returns <samp>0</samp> if no error occured,
+   and <samp>-1</samp> otherwise. In the latter case <samp>SgError</samp>
+   points to the error message.
+<p>Example:
+ <pre>
+        T_SgInfo  SgInfo, BC_SgInfo;
+        T_RTMx    CBMx, InvCBMx;
+        ...
+        InitSgInfo(&amp;BC_SgInfo);
+
+        if (TransformSgInfo(&amp;SgInfo, &amp;CBMx, &amp;InvCBMx, &amp;BC_SgInfo) == 0)
+          CompleteSgInfo(&amp;BC_SgInfo);
+</pre>
+
+<hr>
+<a name="func_FindTabSgNameEntry"></a>
+<pre>
+const T_TabSgName *<a href="#func_sgio_c">FindTabSgNameEntry</a>(const char *UserSgName,
+                                      int VolLetter);
+</pre>
+<p><samp>FindTabSgNameEntry()</samp> is able to find the proper entry in the
+   <a href="sginfo_listtable.html">internal table</a>
+   of space group symbols, given
+   either a space group number, a Sch&ouml;nflies symbol, or
+   a Hermann-Mauguin symbol, passed by <samp>UserSgName</samp>.<br>
+   If <samp>VolLetter</samp> equals <samp>'I'</samp>,
+   the conventions of ITVI apply
+   (e.g., with
+   <samp>UserSgName = &quot;5&quot;</samp> setting &quot;B112&quot;
+   is obtained),
+   otherwise the conventions of ITVA apply
+   (e.g., with
+   <samp>UserSgName = &quot;5&quot;</samp> setting &quot;C121&quot;
+   is obtained).
+<p>If there is no proper entry in the internal table,
+   <samp>FindTabSgNameEntry()</samp> returns <samp>NULL</samp>.
+<p>Note: <samp>FindTabSgNameEntry()</samp> tries very hard to find
+   a proper entry. In an attempt to cover the most common historical
+   computer notations, several &quot;extras&quot; have been introduced;
+   and, of course, the search is not case-sensitive.<br>
+   A few examples:
+ <pre>
+        Fm3m    =&gt;  F m -3 m
+        FM3-M   =&gt;  F m -3 m
+        Fd3m S  =&gt;  F d -3 m :1
+        Fd3m Z  =&gt;  F d -3 m :2
+        P2b     =&gt;  P 1 2 1
+        P2c     =&gt;  P 1 1 2
+        R32R    =&gt;  R 3 2 :R
+</pre>
+
+<p>Example:
+ <pre>
+        const T_TabSgName  *TSgN;
+        char               *UserSgName;
+        ...
+        TSgN = FindTabSgNameEntry(UserSgName, 'A');
+</pre>
+
+<hr>
+<a name="func_SgID_Number"></a>
+<pre>
+unsigned int <a href="#func_sgio_c">SgID_Number</a>(const T_TabSgName *tsgn);
+</pre>
+<p><samp>SgID_Number()</samp> returns an unique
+   integer number in the range <samp>[1...36015]</samp> for the entry of the
+   <a href="sginfo_listtable.html">internal table</a>
+   pointed to by <samp>tsgn</samp>.<br>
+   Of a five digit number, the right
+   3 digits give the space group number, while the first and the second
+   digit on the left encode cell choice, unique axis, origin choice,
+   or basis system (rhombohedral or hexagonal), respectively.
+<p>Upon error <samp>SgID_Number()</samp> returns <samp>0</samp>.
+<p>Example:
+ <pre>
+        unsigned int       SgID;
+        const T_TabSgName  *TSgN;
+        ...
+        SgID = SgID_Number(TSgN);
+</pre>
+
+<hr>
+<a name="func_ParseSymXYZ"></a>
+<pre>
+int <a href="#func_sgio_c">ParseSymXYZ</a>(const char *SymXYZ, T_RTMx *SeitzMx, int FacTr);
+</pre>
+<p><samp>ParseSymXYZ()</samp> translates (ignoring letter case)
+   the string <samp>SymXYZ</samp>,
+   e.g. <samp>&quot;-y, x-y, z+1/3&quot;</samp>,
+   to a <samp><a href="#tdef_T_RTMx">T_RTMx</a></samp> structure
+   <samp>SeitzMx</samp>.<br>
+   Both, fractional and decimal notation for the translation
+   components is possible. Translational components are converted
+   to integer through muliplication by <samp>FacTr</samp>, followed
+   by rounding.
+   If the deviation introduced by this manipulation is greater than
+   1% of FacTr, an error condition is generated.
+<p>Caveat: Factors for <samp>x,y,z</samp>, e.g. <samp>&quot;2*x&quot</samp>
+   are currently not supported.
+<p><samp>ParseSymXYZ()</samp> returns <samp>0</samp> if no error occured,
+   and <samp>-1</samp> otherwise.
+<p>Example:
+ <pre>
+        int     Result;
+        char    *SymXYZ;
+        T_RTMx  SeitzMx;
+        ...
+        Result = ParseSymXYZ(SymXYZ, &amp;SeitzMx, <a href="#base_factors">STBF</a>);
+</pre>
+
+<hr>
+<a name="func_ParseHallSymbol"></a>
+<pre>
+int <a href="#func_sgio_c">ParseHallSymbol</a>(const char *hsym, T_SgInfo *SgInfo);
+</pre>
+<p><samp>ParseHallSymbol()</samp> translates (ignoring letter case)
+   the <samp>hsym</samp>
+   <a href="hall_symbols.html">Hall symbol</a>
+   to Seitz matrices and adds them to
+   <samp>SgInfo-&gt;ListSeitzMx</samp> by calling the lower level
+   function <a href="#func_Add2ListSeitzMx">Add2ListSeitzMx()</a>.
+<dl>
+<dt>In order to prevent problems with exotic operating systems,
+    several &quot;character-aliases&quot; have been introduced:
+   <dd><samp>_</samp> =&gt; white-space
+   <dd><samp>.</samp> =&gt; white-space
+   <dd><samp>q</samp> =&gt; '
+   <dd><samp>+</samp> =&gt; &quot;
+</dl>
+<p><samp>ParseHallSymbol()</samp> always returns the index of the position
+   of the last parsed character of <samp>hsym</samp>. If an error
+   occurred, <samp>SgError</samp> points the the error message.
+<p>Example:
+ <pre>
+        int       i;
+        int       PosHallSymbol;
+        T_SgInfo  SgInfo;
+        char      *HallSymbol;
+        ...
+        PosHallSymbol = ParseHallSymbol(HallSymbol, &amp;SgInfo);
+
+        if (SgError != NULL)
+        {
+          fprintf(stderr, &quot;    %s\n&quot;, HallSymbol);
+          for (i = 0; i &lt; PosHallSymbol; i++) putc('-', stderr);
+          fprintf(stderr, &quot;---^\n&quot;);
+          fprintf(stderr, &quot;%s\n&quot;, SgError);
+          exit(1);
+        }
+</pre>
+
+<hr>
+<a name="func_PrintFullHM_SgName"></a>
+<pre>
+int <a href="#func_sgio_c">PrintFullHM_SgName</a>(const T_TabSgName *tsgn, int space, FILE *fpout);
+</pre>
+<p><samp>PrintFullHM_SgName()</samp> prints a Hermann-Mauguin symbol
+   of the entry of the
+   <a href="sginfo_listtable.html">internal table</a>
+   of space group symbols, pointed to by <samp>tsgn</samp>,
+   on the file pointed to by <samp>fpout</samp>. With <samp>space = 0</samp>
+   output is, e.g., <samp>&quot;Fm-3m&quot;</samp>,
+   with <samp>space = '_'</samp>
+   output is <samp>&quot;F_m_-3_m&quot;</samp>;
+   any character is permitted.
+<p><samp>PrintFullHM_SgName()</samp> returns the number of characters
+   printed. (Caveat: output error diagnostics are currently not supported.)
+<p>Example:
+ <pre>
+        int                nout;
+        const T_TabSgName  *TSgN;
+        FILE               *fpout;
+        ...
+        nout = PrintFullHM_SgName(TSgN, ' ', fpout);
+</pre>
+
+<hr>
+<a name="func_PrintTabSgNameEntry"></a>
+<pre>
+void <a href="#func_sgio_c">PrintTabSgNameEntry</a>(const T_TabSgName *tsgn, int Style, int space,
+                         FILE *fpout);
+</pre>
+<p><samp>PrintTabSgNameEntry()</samp> prints an entry of the
+   <a href="sginfo_listtable.html">internal table</a>
+   of space group symbols, pointed to by <samp>tsgn</samp>,
+   on the file pointed to by <samp>fpout</samp>.<br>
+   With <samp>space = 0</samp> output is, e.g.:
+<pre>
+        &quot;225  Oh^5  Fm-3m  -F 4 2 3&quot;
+</pre>
+   With <samp>space = '_'</samp> output is:
+<pre>
+        &quot;225  Oh^5  F_m_-3_m  -F 4 2 3&quot;
+</pre>
+   Any character is permitted.<br>
+   With <samp>Style = 0</samp> the four output fields will be
+   separated by exactly two white-space characters.
+   With <samp>Style = 1</samp> the fields will be
+   &quot;tabulated&quot; at positions 1,12,26, and 54, respectively.
+<p>Caveat: output error diagnostics are currently not supported.
+<p>Example:
+ <pre>
+        const T_TabSgName  *TSgN;
+        FILE               *fpout;
+        ...
+        PrintTabSgNameEntry(TSgN, 0, 0, fpout);
+</pre>
+
+<hr>
+<a name="func_FormatFraction"></a>
+<pre>
+const char *<a href="#func_sgio_c">FormatFraction</a>(int nume, int deno, int Decimal,
+                           char *Buffer, int SizeBuffer);
+</pre>
+<p><samp>FormatFraction()</samp> takes the numerator <samp>nume</samp>
+   and the denominator <samp>deno</samp>.
+   For <samp>Decimal&nbsp;=&nbsp;0</samp>
+   the numerator and denominator are made relatively prime, e.g.
+   <samp>6/12</samp> becomes <samp>1/2</samp>. Then the result
+   is printed to a string (see below). If the simplified denominator
+   is&nbsp;1, only the numerator will be printed and no &quot;/&quot;
+   appears.<br>
+   For <samp>Decimal&nbsp;=&nbsp;1</samp> <samp>FormatFraction()</samp>
+   simply prints the decimal number, e.g. <samp>&quot;.5&quot;</samp>.
+<p>If <samp>Buffer</samp> is not the <samp>NULL</samp> pointer,
+   <samp>SizeBuffer</samp> indicates the number of characters allocted
+   for <samp>Buffer</samp>, output goes to <samp>Buffer</samp>,
+   and <samp>Buffer</samp> will also be the pointer returned.<br>
+   If <samp>Buffer</samp> is the <samp>NULL</samp> pointer,
+   output goes to a static internal character array, and a pointer
+   to this array is returned. (Be careful with <samp>Buffer = NULL</samp>.
+   Any new call to <samp>FormatFraction()</samp> with
+   <samp>Buffer = NULL</samp> destroys the previous result, of course!)
+<p><samp>FormatFraction()</samp> returns <samp>NULL</samp>
+   if <samp>Buffer</samp> (or
+   the internal character array) is too small. In addition
+   <samp>SgError</samp> is set.<br>
+   However, with <samp>SizeBuffer&nbsp;&gt;=&nbsp;40</samp> this
+   should never happen.
+<p>Example:
+ <pre>
+        const char  *ff;
+        T_RTMx      SeitzMx;
+        ...
+        ff = FormatFraction(SeitzMx.s.T[0], <a href="#base_factors">STBF</a>, NULL, 0);
+</pre>
+
+<hr>
+<a name="func_RTMx2XYZ"></a>
+<pre>
+const char *<a href="#func_sgio_c">RTMx2XYZ</a>(const T_RTMx *RTMx, int FacRo, int FacTr,
+                     int Decimal, int TrFirst, int Low,
+                     const char *Seperator,
+                     char *BufferXYZ, int SizeBufferXYZ);
+</pre>
+<p><samp>RTMx2XYZ()</samp> prints the
+   <samp><a href="#tdef_T_RTMx">T_RTMx</a></samp>
+   structure <samp>RTMx</samp> with the
+   <em>rotation base factor</em> <samp>FacRo</samp>
+   (e.g. <samp>1</samp> or <samp><a href="#base_factors">CRBF</a></samp>)
+   and the
+   <em>translation base factor</em> <samp>FacTr</samp>
+   (e.g. <samp><a href="#base_factors">STBF</a></samp>
+   or <samp><a href="#base_factors">CTBF</a></samp>)
+   in &quot;<samp>XYZ</samp>&quot; format
+   (e.g. <samp>&quot;-y,x-y,z+1/3&quot;</samp>
+   or <samp>&quot;1/2*x+1/2*y,z,1/2*x-1/2*y&quot;</samp>)
+   to a string (see below).
+<p>For <samp>Decimal&nbsp;=&nbsp;0</samp> output is, e.g.,
+   <samp>&quot;x,y+1/2,-z&quot;</samp>,
+   for <samp>Decimal&nbsp;=&nbsp;1</samp> output is
+   <samp>&quot;x,y+.5,-z&quot;</samp>.
+<p>For <samp>TrFirst = 0</samp> (&quot;translation first&quot;) output is, e.g.,
+   <samp>&quot;x,y+1/2,-z&quot;</samp>,
+   for <samp>TrFirst&nbsp;=&nbsp;1</samp> output is
+   <samp>&quot;x,1/2+y,-z&quot;</samp>.
+<p>For <samp>Low&nbsp;=&nbsp;0</samp> output is, e.g.,
+   <samp>&quot;X,Y+1/2,-Z&quot;</samp>,
+   for <samp>Low&nbsp;=&nbsp;1</samp> output is
+   <samp>&quot;x,y+1/2,-z&quot;</samp>.
+<p>For <samp>Seperator&nbsp;=&nbsp;NULL</samp> output is, e.g.,
+   <samp>&quot;x,y+1/2,-z&quot;</samp>,
+   for, e.g., <samp>Seperator&nbsp;=&nbsp;&quot;&nbsp;#&nbsp;&quot;</samp>
+   output is
+   <samp>&quot;x&nbsp;#&nbsp;y+1/2&nbsp;#&nbsp;-z&quot;</samp>.
+   Any string is permitted.
+<p>If <samp>BufferXYZ</samp> is not the <samp>NULL</samp> pointer,
+   <samp>SizeBufferXYZ</samp> indicates the number of characters allocted
+   for <samp>BufferXYZ</samp>, output goes to <samp>BufferXYZ</samp>,
+   and <samp>BufferXYZ</samp> will also be the pointer returned.<br>
+   If <samp>BufferXYZ</samp> is the <samp>NULL</samp> pointer,
+   output goes to a static internal character array, and a pointer
+   to this array is returned. (Be careful with <samp>BufferXYZ = NULL</samp>.
+   Any new call to <samp>RTMx2XYZ()</samp> with
+   <samp>BufferXYZ&nbsp;=&nbsp;NULL</samp> destroys the previous result,
+   of course!)
+<p><samp>RTMx2XYZ()</samp> returns <samp>NULL</samp> if <samp>BufferXYZ</samp>
+   (or the internal character array) is too small. In addition
+   <samp>SgError</samp> is set.<br>
+   However, with <samp>SizeBufferXYZ&nbsp;&gt;=&nbsp;80</samp> this
+   should never happen.
+<p>Example:
+ <pre>
+        const char  *xyz;
+        T_RTMx      CBMx;
+        ...
+        xyz = RTMx2XYZ(&amp;CBMx, CRBF, CTBF, 0, 0, 1, &quot;, &quot;, NULL, 0);
+</pre>
+
+<hr>
+<a name="func_PrintMapleRTMx"></a>
+<pre>
+void <a href="#func_sgio_c">PrintMapleRTMx</a>(const T_RTMx *RTMx, int FacRo, int FacTr,
+                    const char *Label, FILE *fpout);
+</pre>
+<p><samp>PrintMapleRTMx()</samp> prints the
+   <samp><a href="#tdef_T_RTMx">T_RTMx</a></samp>
+   structure <samp>RTMx</samp> with the
+   <em>rotation base factor</em> <samp>FacRo</samp>
+   (e.g. <samp>1</samp> or <samp><a href="#base_factors">CRBF</a></samp>)
+   and the
+   <em>translation base factor</em> <samp>FacTr</samp>
+   (e.g. <samp><a href="#base_factors">STBF</a></samp>
+   or <samp><a href="#base_factors">CTBF</a></samp>)
+   in <strong>Maple&nbsp;V</strong> matrix format<br>
+   on the file pointed to by <samp>fpout</samp>.
+<p>For <samp>Label&nbsp;=&nbsp;NULL</samp> output is, e.g.,
+   <samp>&quot;&nbsp;:=&nbsp;matrix(4,4,&nbsp;[&nbsp;-1,0,0,0,&nbsp;0,1,0,1/2,&nbsp;0,0,-1,0,&nbsp;0,0,0,1]);&quot;</samp>,<br>
+   for, e.g., <samp>Label&nbsp;=&nbsp;&quot;m1&quot;</samp> output is
+   <samp>&quot;m1&nbsp;:=&nbsp;matrix(4,4,&nbsp;[&nbsp;-1,0,0,0,&nbsp;0,1,0,1/2,&nbsp;0,0,-1,0,&nbsp;0,0,0,1]);&quot;</samp>.<br>
+   This is the resulting <strong>Maple V</strong>
+   &quot;Pretty Print&quot; output:
+ <pre>
+             [ -1  0   0   0  ]
+             [                ]
+             [  0  1   0  1/2 ]
+       m1 := [                ]
+             [  0  0  -1   0  ]
+             [                ]
+             [  0  0   0   1  ]
+</pre>
+<p>Note: the bottom line of the matrix is always
+   <samp>&quot;[ 0 0 0 1 ]&quot;</samp>.
+<p>Caveat: output error diagnostics are currently not supported.
+<p>Example:
+ <pre>
+        T_RTMx  CBMx;
+        FILE    *fpout;
+        ...
+        PrintMapleRTMx(&amp;CBMx, CRBF, CTBF, "CBMx", fpout);
+</pre>
+
+<hr>
+<a name="func_ListSgInfo"></a>
+<pre>
+void <a href="#func_sgio_c">ListSgInfo</a>(const T_SgInfo *SgInfo, int F_XYZ, int F_Verbose,
+                FILE *fpout);
+</pre>
+<p><samp>ListSgInfo()</samp> prints several items of
+   <samp><a href="#tdef_T_SgInfo">SgInfo</a></samp>
+   on the file pointed to by <samp>fpout</samp>, e.g.:
+ <pre>
+        Point Group  3
+        Laue  Group  -3
+        Trigonal
+        Unique Axis  z
+        Obverse
+
+        Order     9
+        Order P   3
+
+        s.i.Vector  Modulus
+          0  0  1   0
+</pre>
+<p>If <samp>F_XYZ != 0</samp> the entries of
+   <samp>Sginfo-&gt;ListSeitzMx</samp> will be appended in
+   <samp>&quot;XYZ&quot;</samp> format, e.g.:
+ <pre>
+        #List     3
+
+        x, y, z
+        -y, x-y, z
+        -x+y, -x, z
+</pre>
+<p>If <samp>F_Verbose != 0</samp> the entries of
+   <samp>Sginfo-&gt;ListSeitzMx</samp> and
+   <samp>Sginfo-&gt;ListRotMxInfo</samp>
+   will be appended in
+   the following form:
+ <pre>
+        #List     3
+
+        (1)    1    [ 0  0  0] 'o' '.'    x, y, z
+          1  0  0      0
+          0  1  0      0
+          0  0  1      0
+
+        (2)    3    [ 0  0  1] 'z' '='    -y, x-y, z
+          0 -1  0      0
+          1 -1  0      0
+          0  0  1      0
+
+        (3)    3^-1 [ 0  0  1] 'z' '='    -x+y, -x, z
+         -1  1  0      0
+         -1  0  0      0
+          0  0  1      0
+</pre>
+<p><samp>ListSgInfo()</samp> is meant to be for debugging purposes.
+   Furthermore, the source code of <samp>ListSgInfo()</samp>
+   can serve as an example on how to access and interpret the
+   <samp>T_SgInfo</samp> structure members.
+<p>If an error occurrs <samp>SgError</samp> points to the error message.
+<p>Caveat: output error diagnostics are currently not supported.
+<p>Example:
+ <pre>
+        T_SgInfo  SgInfo;
+        FILE      *fpout;
+        ...
+        ListSgInfo(&amp;SgInfo, 0, 1, fpout);
+</pre>
+
+<hr>
+<a name="func_FindReferenceSpaceGroup"></a>
+<pre>
+const T_TabSgName *<a href="#func_sgfind_c">FindReferenceSpaceGroup</a>(T_SgInfo *SgInfo,
+                                           T_RTMx *CBMx, T_RTMx *InvCBMx);
+</pre>
+<p><samp>FindReferenceSpaceGroup()</samp> scans the
+   <a href="sginfo_listtable.html">internal table</a>
+   of space group symbols and tries to match the
+   <a href="hall_symbols.html">Hall generators</a>
+   to symmetry operations of <samp>SgInfo</samp> - thereby
+   building the change-of-basis matrix <samp>CBMx</samp> and its inverse
+   <samp>InvCBMx</samp> - until a correct entry of the internal
+   table has been found.
+<p><samp>CBMx</samp> transforms coordinates of the
+   &quot;<samp>SgInfo</samp>-setting&quot;
+   to coordinates of the reference setting.
+<p>Upon successful completition, a pointer to an entry of
+   <samp><a href="#tdef_T_TabSgName">TabSgName</a></samp>
+   is returned. Otherwise <samp>NULL</samp> is returned and
+   <samp>SgError</samp> points to the error message.
+<p>Example:
+ <pre>
+        const T_TabSgName  *ReferenceTSgN;
+        T_SgInfo           SgInfo;
+        T_RTMx             CBMX, InvCBMx;
+        ...
+        ReferenceTSgN = FindReferenceSpaceGroup(&amp;SgInfo, &amp;CBMx, &amp;InvCBMx);
+</pre>
+
+<p>The result of FindReferenceSpaceGroup() is not necessarily a
+   &quot;standard&quot; setting, but a more or less arbitrary
+   &quot;reference&quot;setting. To obtain the standard setting
+   further action has to be taken. A nice trick to get the
+   standard setting is to use the list of Sch&ouml;nflies
+   symbols in a call to
+   <a href="#func_FindTabSgNameEntry">FindTabSgNameEntry()</a>:
+
+<pre>
+        #define&nbsp;<a href=#how_to_include_sginfo_h>SGCOREDEF__</a>
+        #include&nbsp;&quot;sginfo.h&quot;
+        ...
+        StandardTSgN = FindTabSgNameEntry(
+                         SchoenfliesSymbols[ReferenceTSgN-&gt;SgNumber], 'A');
+</pre>
+
+
+<hr>
+<a name="func_IsSysAbsent_hkl"></a>
+<pre>
+int <a href="#func_sghkl_c">IsSysAbsent_hkl</a>(const <a href="#tdef_T_SgInfo">T_SgInfo</a> *SgInfo,
+                    int h, int k, int l, int *TH_Restriction);
+</pre>
+<p><samp>IsSysAbsent_hkl()</samp> tests if the reflection with
+   indices <samp>hkl</samp> is systematic absent for the space group
+   as described by <samp>SgInfo</samp>. If so,
+   a code for the symmetry operation which causes the
+   systematic absence is returned. The code is
+   <samp>+-(iList&nbsp;+&nbsp;iTrV&nbsp;*&nbsp;SgInfo-&gt;nList&nbsp;+&nbsp;1)</samp>,
+   where <samp>iList</samp> is the index of <samp>ListSeitzMx</samp>,
+   and <samp>iTrv</samp> is the index of the lattice translation
+   vector as stored in
+   <samp>SgInfo-&gt;<a href="#tdef_T_LatticeInfo">LatticeInfo</a></samp>.
+   If the symmetry operation was multiplied by the inversion operation
+   at the origin (centro-symmetric space groups only), the sign is
+   negative, positive otherwise.<br>
+   For non-absent, i.e. permitted reflections <samp>0</samp>
+   is returned.<br>
+   In addition,
+   if <samp>TH_Restriction</samp> is not the <samp>NULL</samp> pointer,
+   and the reflection <samp>hkl</samp> has no phase restriction,
+   <samp>*TH_Restriction</samp> is set to <samp>-1</samp>.
+   For values <samp>&gt;=&nbsp;0</samp> the restricted phase angles in
+   degrees are given by
+   <samp>P&nbsp;=&nbsp;(*TH_Restriction)&nbsp;*&nbsp;(180&nbsp;/&nbsp;<a href=#base_factors>STBF</a>)</samp>,
+   and <samp>P&nbsp;+&nbsp;180</samp>, respectively.
+<p>If an error occurrs <samp>SgError</samp> points to the error message.
+<p>Example:
+ <pre>
+        int       h, k, l, is_absent, restriction;
+        T_SgInfo  SgInfo;
+        ...
+        is_absent = IsSysAbsent_hkl(&amp;SgInfo, h, k, l, &amp;restriction);
+</pre>
+
+<hr>
+<a name="func_BuildEq_hkl"></a>
+<pre>
+int <a href="#func_sghkl_c">BuildEq_hkl</a>(const <a href="#tdef_T_SgInfo">T_SgInfo</a> *SgInfo,
+                <a href="#tdef_T_Eq_hkl">T_Eq_hkl</a> *Eq_hkl, int h, int k, int l);
+</pre>
+<p><samp>BuildEq_hkl()</samp> generates the symmetry equivalent indices
+   (for the space group as described by <samp>SgInfo</samp>)
+   of reflection <samp>hkl</samp> and stores them in
+   the <samp>Eq_hkl</samp> structure. Of the Friedel mates only one
+   is included in the list.
+ <dl>
+   <dt><samp>Eq_hkl-&gtM</samp>
+     <dd>holds the multiplicity of <samp>hkl</samp>.
+   <dt><samp>Eq_hkl-&gtN</samp>
+     <dd>holds the number of symmetry equivalent indices stored.<br>
+         For <samp>hkl&nbsp;==&nbsp;000</samp>
+         <samp>M&nbsp;=&nbsp;N&nbsp;=&nbsp;1</samp>.<br>
+         For <samp>hkl&nbsp;!=&nbsp;000</samp>
+         <samp>M&nbsp;=&nbsp;2&nbsp;*&nbsp;N</samp>.
+   <dt><samp>Eq_hkl-&gth, Eq_hkl-&gtk, Eq_hkl-&gtl</samp>
+     <dd>store the symmetry equivalent indices.
+   <dt><samp>Eq_hkl-&gtTH</samp>
+     <dd>stores the list of phase shifts relative to
+         <samp>Eq_hkl-&gth|k|l[0]</samp>,
+         which are equal to <samp>hkl</samp>.<br>
+         The phase shift <samp>Eq_hkl-&gtTH[i]</samp> of
+         <samp>Eq_hkl-&gth|k|l[i]</samp>
+         <em>adds</em> to the phase angle of <samp>hkl</samp>.<br>
+         The phase shift in degrees is
+         <samp>Eq_hkl-&gtTH[i]&nbsp;*&nbsp;(360&nbsp;/&nbsp;<a href=#base_factors>STBF</a>)</samp>.
+</dl>
+<p>Upon success <samp>BuildEq_hkl()</samp> returns <samp>Eq_hkl-&gtM</samp>,
+   otherwise <samp>0</samp> is returned and <samp>SgError</samp>
+   points to the error message.
+<p>Example:
+ <pre>
+        int       M, h, k, l;
+        T_SgInfo  SgInfo;
+        T_Eq_hkl  Eq_hkl;
+        ...
+        M = BuildEq_hkl(&amp;SgInfo, &amp;Eq_hkl, h, k, l);
+</pre>
+
+<hr>
+<a name="func_AreSymEquivalent_hkl"></a>
+<pre>
+int <a href="#func_sghkl_c">AreSymEquivalent_hkl</a>(const <a href="#tdef_T_SgInfo">T_SgInfo</a> *SgInfo, int h1, int k1, int l1,
+                                                 int h2, int k2, int l2);
+</pre>
+<p><samp>AreSymEquivalent_hkl()</samp> tests whether the reflection with
+   indices <samp>h1&nbsp;k1&nbsp;l1</samp> is symmetry equivalent to
+   <samp>h2&nbsp;k2&nbsp;l2</samp>
+   for the space group as described by <samp>SgInfo</samp>.
+   If so, a code for the symmetry operation which maps the
+   reflections is returned.
+   The code is <samp>+-(iList&nbsp;+&nbsp;1)</samp>,
+   where <samp>iList</samp> is the index of <samp>ListSeitzMx</samp>.
+   If the symmetry operation was multiplied by the inversion operation
+   at the origin (centro-symmetric space groups only), the sign is
+   negative, positive otherwise.<br>
+   For symmetry independent reflections <samp>0</samp> is returned.
+<p>Example:
+ <pre>
+        int       h1, k1, l1, h2, k2, l2, are_equiv;
+        T_SgInfo  SgInfo;
+        ...
+        are_equiv = AreSymEquivalent_hkl(&amp;SgInfo, h1, k1, l1, h2, k2, l2);
+</pre>
+
+<hr>
+<a name="func_SetListMin_hkl"></a>
+<pre>
+void <a href="#func_sghkl_c">SetListMin_hkl</a>(const <a href="#tdef_T_SgInfo">T_SgInfo</a> *SgInfo,            int  Maxk, int  Maxl,
+                                            int *Minh, int *Mink, int *Minl);
+</pre>
+<a name="func_IsSuppressed_hkl"></a>
+<pre>
+int <a href="#func_sghkl_c">IsSuppressed_hkl</a>(const <a href="#tdef_T_SgInfo">T_SgInfo</a> *SgInfo, int Minh, int Mink, int Minl,
+                                                       int Maxk, int Maxl,
+                                             int    h, int    k, int    l);
+</pre>
+<p>These two functions are designed to help in constructing a
+   <samp>hkl</samp> list for the space group as described
+   by <samp>SgInfo</samp>.<br>
+   Depending on the crystal system and on the <em>positive</em>
+   values of <samp>Maxk</samp> and <samp>Maxl</samp>,
+   <samp>SetListMin_hkl()</samp>
+   sets <samp>Minh</samp>, <samp>Mink</samp>, and <samp>Minl</samp>
+   (<samp>Minh</samp> is always <samp>0</samp>). Inside a loop
+   over <samp>Minh|k|l...Maxh|k|l</samp> <samp>IsSuppressed_hkl()</samp>
+   decides, whether a symmetry equivalent reflex of
+   <samp>hkl</samp>has already appeared before. If so, a code
+   for the corresponding symmetry operation is returned; otherwise
+   <samp>0</samp> is returned.<br>
+   The code is <samp>+-(iList&nbsp;+&nbsp;1)</samp>,
+   where <samp>iList</samp> is the index of <samp>ListSeitzMx</samp>.
+   If the symmetry operation was multiplied by the inversion operation
+   at the origin (centro-symmetric space groups only), the sign is
+   negative, positive otherwise.<br>
+<p>The <samp><a href="sginfo_simple_hkllist.html">Simple_hklList()</a></samp>
+   function of <samp>sginfo.c</samp>
+   gives an example for the usage of <samp>SetListMin_hkl()</samp>
+   and <samp>IsSuppressed_hkl()</samp>.
+
+
+<hr>
+<a name="func_Is_si"></a>
+<pre>
+int <a href="#func_sgsi_c">Is_si</a>(const <a href="#tdef_T_SgInfo">T_SgInfo</a> *SgInfo, int h, int k, int l);
+</pre>
+<p><samp>Is_si()</samp> returns&nbsp;<samp>1</samp> if the phase
+   angle of the reflex with index <samp>hkl</samp> is a
+   structure semi-invariant, <samp>0</samp>&nbsp;otherwise.<br>
+   <samp><a href="#func_Set_si">Set_si()</a></samp>
+   has to be called before the first
+   call to <samp>Is_si()</samp>.
+<p>Example:
+ <pre>
+        int       h, k, l, si;
+        T_SgInfo  SgInfo;
+        ...
+        si = Is_si(&amp;SgInfo, h, k, l);
+</pre>
+
+<hr>
+<a name="func_Set_si"></a>
+<pre>
+int <a href="#func_sgsi_c">Set_si</a>(<a href="#tdef_T_SgInfo">T_SgInfo</a> *SgInfo);
+</pre>
+<p><samp>Set_si()</samp> sets the <samp>SgInfo</samp> structure members
+   <samp>n_si_Vector</samp>,
+   <samp>si_Vector</samp>, and
+   <samp>si_Modulus</samp>.<br>
+   <samp><a href="#func_CompleteSgInfo">CompleteSgInfo()</a></samp>
+   has to be called prior to <samp>Set_si()</samp>.
+<p>Upon success <samp>Set_si()</samp> returns <samp>0</samp>;
+   otherwise <samp>-1</samp> is returned and <samp>SgError</samp>
+   points to the error message.
+<p>Example:
+ <pre>
+        int       Result;
+        T_SgInfo  SgInfo;
+        ...
+        Result = Set_si(&amp;SgInfo);
+</pre>
+<p><a name="lit_giacovazzo">Literature</a>:
+   Carmelo Giacovazzo, Direct Methods in Crystallography,
+   Academic Press Inc. (London) 1980.
+<p>Caveat: the results of the <samp>Set_si()</samp> algorithm are
+   extensively tested and (believed to be) correct for any
+   space group and any setting. However, the algorithm itself is
+   anything but sophisticated and consumes much more time and memory than
+   necessary; a better implemantation is desirable.
+   (On the other hand, even this brute-force implementation is
+   very unlikely to ever cause a noteworthy delay.)
+
+<hr>
+<a name="func_Set_uvw"></a>
+<pre>
+void <a href="#func_sgsi_c">Set_uvw</a>(const <a href="#tdef_T_SgInfo">T_SgInfo</a> *SgInfo, int h, int k, int l, int *uvw);
+</pre>
+<p>For each of the <samp>SgInfo-&gt;n_si_Vector</samp>
+   semi-invariant vectors <samp>Set_uvw()</samp> computes the
+   scalar product &quot;s.i.vector * <samp>hkl</samp> modulo s.i.moduls&quot;.
+   The <samp>n_si_Vector</samp> results go to <samp>uvw</samp> and are
+   intended to be used to establish the <em>primitivity condition</em>
+   (see <a href="#lit_giacovazzo">Giacovazzo</a>).<br>
+   <samp><a href="#func_Set_si">Set_si()</a></samp>
+   has to be called before the first
+   call to <samp>Set_uvw()</samp>.
+<p>Example:
+ <pre>
+        int       h, k, l, uvw[3];
+        T_SgInfo  SgInfo;
+        ...
+        Set_uvw(&amp;SgInfo, h, k, l, uvw);
+</pre>
+
+<hr>
+ <h2><a name="sginfo_macros" href="#head">SgInfo macros</a>
+</h2>
+ <p><samp>sginfo.h</samp> defines three macros for simple but
+    frequent tasks.
+
+<hr>
+ <pre>
+<a href="#sginfo_macros">Sg_nLoopInv</a>(SgInfo_)
+</pre>
+<p><samp>Sg_nLoopInv</samp> returns the constant <samp>2</samp> if
+   <samp><a href="#SgInfo_Centric">SgInfo-&gt;Centric</a></samp>
+   is <samp>-1</samp>, and
+   the constant <samp>1</samp> otherwise.<br>
+   Purpose: using this macro makes an application independent
+   of the conventions for <samp>SgInfo-&gt;Centric</samp>.
+<p>Example:
+ <pre>
+        int       nLoopInv, iLoopInv;
+        T_SgInfo  SgInfo;
+        ...
+        nLoopInv = Sg_nLoopInv(&amp;SgInfo);
+        ...
+        for (iLoopInv = 0; iLoopInv < nLoopInv; iLoopInv++)
+          ...
+</pre>
+<p>See also: <a href="sginfo_loop_symops.html">LoopSymOps()</a>
+
+<hr>
+ <pre>
+<a href="#sginfo_macros">InitRotMx</a>(RotMx, diagonal)
+</pre>
+<p><samp>InitRotMx</samp> sets all off-diagonal elements of
+   the rotation matrix <samp>RotMx</samp> to <samp>0</samp>.
+   The diagonal elements are set to <samp>diagonal</samp>.
+<p>Example:
+ <pre>
+        int  RotMx[9];
+        ...
+        InitRotMx(RotMx, 1);
+</pre>
+
+<hr>
+ <pre>
+<a href="#sginfo_macros">InitSeitzMx</a>(SeitzMx_, diagonal)
+</pre>
+<p><samp>InitSeitzMx</samp> sets all off-diagonal elements of
+   the Seitz matrix <samp>SeitzMx_</samp> to <samp>0</samp>.
+   The diagonal elements are set to <samp>diagonal</samp>.
+<p>Example:
+ <pre>
+        T_RTMx  SeitzMx;
+        ...
+        InitSeitzMx(&SeitzMx, 1);
+</pre>
+
+<hr>
+<address>
+ Ralf W. Grosse-Kunstleve
+ &lt;<a href="mailto:rwgk@cci.lbl.gov"
+                    >rwgk@cci.lbl.gov</a>&gt;
+</address>
+
+</body>
+</html>

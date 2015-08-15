@@ -1,0 +1,69 @@
+<html>
+<head>
+ <title>Abstract ECM-16</title>
+</head>
+
+<body>
+<h2>Abstract ECM-16</h2>
+
+<h3>A comprehensive Collection of Procedures for the
+Handling of Space Group Symmetry</h3>
+
+<p><em>R.W. Grosse-Kunstleve &amp; L.B. McCusker</em><br>
+   <em>Lab. of Crystallography, ETH Zurich, Switzerland</em>
+
+<hr>
+<p>     A library of procedures for the generation of space-group
+symmetry information is presented. In addition to its functionality
+related to symmetry generation, the library also contains
+procedures for deriving semi-invariant vectors and moduli from a
+set of symmetry matrices, and procedures to assist in the
+treatment of symmetry in reciprocal space. The library gives easy
+on-line access to a total of 530 settings of all space-groups listed
+in the International Tables Volume I (1952) and Volume A (1983)
+(ITVA).
+
+<p>     The design of the procedures is based on the notation
+introduced by Hall [1][2], which enables unambiguous and
+practically unrestricted definition of space-group, setting, and
+origin. Input Hall-symbols are translated into Seitz matrices,
+which, in turn, are used to generate the full set of symmetry
+operations. After the input Hall-symbol has been translated, the
+matrices are sorted and reduced back to an output Hall-symbol.
+For a given space-group and setting, the reduction process will
+always result in the same Hall-symbol, regardless of the way the
+group was generated; i.e., Seitz matrices from any source may be
+passed to the symmetry generating procedures and a well defined
+Hall-symbol will be produced.
+
+<p>     Part of the library is a table which associates ITVA
+space-group numbers, Schoenflies symbols, Hermann-Mauguin
+symbols, and Hall-symbols. This table is used in two ways.
+Space-group numbers and symbols can be translated to a Hall-
+symbol, which is used to generate the symmetry matrices.
+Alternatively, the Hall-symbol produced by the reduction
+algorithm of the library is used to find the appropriate entry in the
+table. Thus, given just the symmetry matrices, the ITVA space-
+group number and symbols can be obtained.
+
+<p>     The library is written in the programming language
+ANSI C.
+
+
+<hr>
+<p>[1]  Hall, S.R.; Space-Group Notation with an Explicit Origin
+        Acta Cryst. (1981). A37, 517-525
+<br>
+   [2]  International Tables Volume B 1994,
+        Section 1.4. Symmetry in reciprocal space
+
+
+<hr>
+<address>
+Ralf W. Grosse-Kunstleve,
+Yale University, New Haven, CT, U.S.A.<br>
+<a href="mailto:rwgk@laplace.csb.yale.edu">rwgk@laplace.csb.yale.edu</a>
+</address>
+
+</body>
+</html>

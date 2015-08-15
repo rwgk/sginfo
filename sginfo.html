@@ -1,0 +1,1166 @@
+<html>
+
+<head>
+<title>SgInfo - Space group Info</title>
+</head>
+
+<body>
+
+<h2>SgInfo - Space group Info</h2>
+<hr>
+<img alt="SgInfo|ofnIgS" src="sginfo.gif">
+
+<hr>
+<h3>A comprehensive Collection of ANSI C Routines for the Handling of<br>
+Space Group Symmetry</h3>
+
+<hr>
+
+<h2>Latest developments</h2>
+SgInfo has been superseded by the space group toolbox (sgtbx), which
+is a part of the open source package
+<a href="http://cctbx.sourceforge.net/"
+>Computational Crystallography Toolbox (cctbx)</a>.
+
+<hr>
+<h2><a name="introduction">Introduction</a></h2>
+<p><strong>SgInfo</strong> is library of ANSI C routines
+<ul>
+  <li> for the <em>generation</em> of symmetry matrices
+  <li> for the <em>derivation</em> of
+    <ul>
+      <li> International Tables Volume A space group name & number
+      <li> crystal system
+      <li> point group
+      <li> laue group
+      <li> semi-invariant vectors and moduli
+    </ul>
+  <em>from symmetry matrices alone</em>
+  <li> to assist in the treatment of symmetry in reciprocal space
+  <li> easy on-line access to a total of <em>530 settings</em> of
+       all space groups listed in the International Tables Volume&nbsp;I
+       (1952) (ITVI) and Volume&nbsp;A (1983) (ITVA)<br>
+</ul>
+
+<p>The design of the routines is based on the notation introduced by
+   Hall which enables unambiguous and practically unrestricted
+   definition of space group, setting, and origin. Input
+   <a href="hall_symbols.html">Hall&nbsp;symbols</a>
+   are translated into Seitz matrices, which, in turn, are used to
+   generate the full set of symmetry operations.
+   After the input Hall symbol has been translated, the
+   matrices are sorted and reduced back to an output Hall symbol.
+   For a given
+   space group and setting, the reduction process will always
+   result in the same Hall symbol, regardless of the way the
+   group was generated; i.e., Seitz matrices from any
+   source may be passed to the symmetry generating
+   routines and a well defined Hall symbol will be produced.
+
+<p>Part of the library is a
+   <a
+    href="sginfo-query.cgi?argl=-ListTable"
+   >table</a>
+   which associates ITVA space group
+   numbers, Sch&ouml;nflies symbols, Hermann-Mauguin symbols, and Hall
+   symbols. This table is used in two ways. Space group numbers and symbols
+   can be translated to a Hall symbol, which is used to generate the symmetry
+   matrices. Alternatively, the Hall symbol produced by the reduction algorithm
+   of the library is used to find the appropriate entry in the table.
+
+<hr>
+<p>What follows in this document, is meant to be an
+   <h3>Introduction and Tutorial.</h3>
+<p>
+   There is also a
+  <h3><a href="sginfo_reference.html">Comprehensive Reference Section</a>,</h3>
+<p><strong>where each structure, subroutine, and macro is explained
+   in detail</strong>.
+
+<hr>
+<p>Table of Content for this document:
+<ul>
+  <li><a href="#demonstration">SgInfo Demonstration Program</a>
+  <ul>
+    <li><a href="#real_life">A real life example</a>
+  </ul>
+  <li><a href="#getting_sginfo">Getting SgInfo</a>
+  <li><a href="#other_software">Other space group software and web sites</a>
+  <li><a href="#known_bugs">Known Bugs</a>
+  <li><a href="#using_sginfo">Using SgInfo in your application</a>
+  <ul>
+    <li><a href="#sginfo_struct">
+        Understanding the <samp>SgInfo</samp> structure</a>
+    <ul>
+      <li><a href="#latticeinfo">Using <samp>SgInfo.LatticeInfo</samp></a>
+    </ul>
+  </ul>
+  <li><a href="#Using_the_space_group_finder">Using the space group finder</a>
+  <li><a href="#copyright">Copyright Notice</a>
+  <li><a href="#references">References</a>
+</ul>
+<hr>
+
+<h2><a name="demonstration">
+    SgInfo Demonstration Program</a></h2>
+
+<p><strong><a href="sginfo-query.cgi"
+   >sginfo WWW gateway</a></strong>
+
+<p>The <strong>SgInfo</strong> package comes with a demonstration
+   program which also has a certain value on its own. Running
+   <samp>sginfo</samp> without arguments will produce a
+   little help screen:
+
+<hr>
+ <pre>
+usage: sginfo [options] [SpaceGroupName_or_# [SpaceGroupName_or_#]]
+  -Hall|VolA|VolI   select conventions
+  -ListTable[=#]    print [parts of] internal table
+  -CIF              print internal table in CIF format
+  -XYZ              print something like &quot;-x, y+1/2, z&quot;
+  -AllXYZ           print all symmetry operations
+  -Maple            print symmetry matrices in Maple format
+  -Space            print symmetry file for AVS SpaceModule
+  -Shelx            print Shelx LATT &amp; SYMM cards
+  -Schakal          print Schakal DU &amp; SY cards
+  -hklList          print simple hkl listing
+  -Standard         compute transformation to &quot;standard&quot; setting
+  -UnitCell=&quot;a..g&quot;  unit cell constants a, b, c, alpha, beta, gamma
+  -v                be more verbose
+  -Verify           debug option: verify transformations
+  -ClearError       debug option: clear errors and continue
+
+examples: <a href="#sginfo_68">sginfo 68</a>
+          sginfo C2/m:c2 -XYZ
+          <a href="#sginfo_shelx">sginfo &quot;Oh^3&quot; -Shelx</a>
+          <a href="#sginfo_hall">sginfo -Hall &quot;-F 4y 2&quot; -Standard</a>
+          <a href="#sginfo_volia">sginfo -VolI 15 -VolA 15</a>
+          sginfo -ListTable=68
+</pre>
+<hr>
+<p>Try some of the examples:
+<hr>
+<pre>
+% <a name="sginfo_68"
+    href="sginfo-query.cgi?argl=68"
+  >sginfo 68</a>
+
+Space Group  68:1  D2h^22  Ccca:1   C 2 2 -1bc
+Point Group  mmm
+Laue  Group  mmm
+Orthorhombic
+Note: Inversion operation off origin
+
+Order    16
+Order P   8
+
+s.i.Vector  Modulus
+  1  0  0   2
+  0  0  1   2
+</pre>
+<hr>
+<p>What does all this mean?
+
+<p>The first line tells you what the lookup in the internal table
+   has produced for &quot;<samp>68</samp>&quot;. This is the entry
+   for space group <samp>68</samp>, <em>Origin Choice 1</em>
+   (<samp><a
+           href="sginfo-query.cgi?argl=-ListTable"
+          >:1</a></samp>).
+   This space group has the Sch&ouml;nflies symbol
+   <samp>D2h^22</samp>, the Herman-Mauguin symbol <samp>Ccca</samp>
+   and the Hall symbol &quot;<samp>C 2 2 -1bc</samp>&quot;.
+<p>After <samp>sginfo</samp> has found the table entry, it
+   translates the Hall symbol to symmetry matrices. Next - through
+   repetive multiplication of these generator matrices - the whole
+   group, i.e. all symmetry matrices of this space group, are
+   computed.
+<p>Knowing all symmetry matrices, <samp>sginfo</samp>
+   derives that space group <samp>68</samp> belongs to point group
+   <samp>mmm</samp>, laue group <samp>mmm</samp>, and the orthorhombic
+   crystal system.
+   Furthermore, space group <samp>68</samp> is centro-symmetric, but
+   the inversion operation is not at the origin (of course this is what
+   ITVA <em>Origin Choice 1</em> means, but <samp>sginfo</samp>
+   finds out without looking at this).
+<p>The maximum number of equivalent positions in
+   space group <samp>68</samp> is indicated by <samp>Order&nbsp;16</samp>.
+   To help people who want to use the <strong>SgInfo</strong> library
+   routines in their own applications, <strong>SgInfo</strong> also
+   stores the maximum number of positions of the
+   primitive&nbsp;&quot;<samp>P</samp>&quot;&nbsp;subgroup of
+   the space group. In this case
+   <samp>Order&nbsp;P&nbsp;8</samp> is reported.
+<p><em>Direct Methods</em> people might be delighted to see that
+   <strong>SgInfo</strong> also knows how to derive semi-invariant
+   vectors and moduli from a set of symmetry matrices. Here we have
+   two semi-invariant vectors - one along x (1 0 0), one along z (0 0 1)
+   - with modulus &quot;<samp>2</samp>&quot;.
+
+<p>In the next example, <samp>sginfo</samp> demonstrates its
+   ability to look up Sch&ouml;nflies symbols. In addition, a
+   list of the symmetry operations in <strong>SHELX</strong>
+   format is requested. For all who do not have
+   <strong>SHELX-TL(TM)</strong>, this could help avoiding a lot
+   of typos:
+
+<hr>
+ <pre>
+% <a name="sginfo_shelx"
+   href="sginfo-query.cgi?argl=%22Oh^3%22+-Shelx"
+  >sginfo &quot;Oh^3&quot; -Shelx</a>
+
+Space Group  223  Oh^3  Pm-3n  -P 4n 2 3
+Point Group  m-3m
+Laue  Group  m-3m
+Cubic
+
+Order    48
+Order P  48
+
+s.i.Vector  Modulus
+  1  1  1   2
+
+LATT  1
+SYMM .5-Y, .5+X, .5+Z
+SYMM -X, -Y, Z
+SYMM .5+Y, .5-X, .5+Z
+SYMM .5+X, .5-Z, .5+Y
+SYMM X, -Y, -Z
+SYMM .5+X, .5+Z, .5-Y
+SYMM .5+Z, .5+Y, .5-X
+SYMM -X, Y, -Z
+SYMM .5-Z, .5+Y, .5+X
+SYMM Z, X, Y
+SYMM Y, Z, X
+SYMM -Y, -Z, X
+SYMM Z, -X, -Y
+SYMM -Y, Z, -X
+SYMM -Z, -X, Y
+SYMM -Z, X, -Y
+SYMM Y, -Z, -X
+SYMM .5+Y, .5+X, .5-Z
+SYMM .5-Y, .5-X, .5-Z
+SYMM .5-X, .5+Z, .5+Y
+SYMM .5-X, .5-Z, .5-Y
+SYMM .5+Z, .5-Y, .5+X
+SYMM .5-Z, .5-Y, .5-X
+</pre>
+<hr>
+
+<p>The next example again demonstrates two new features: how to enter
+   a Hall symbol from the command line and how to find out which space
+   group is generated by this Hall symbol:
+
+<hr>
+<pre>
+% <a name="sginfo_hall"
+   href="sginfo-query.cgi?argl=-Hall+%22-F+4y+2%22+-Standard"
+  >sginfo -Hall &quot;-F 4y 2&quot; -Standard</a>
+
+Setting A:
+
+Hall Symbol  -F 4y 2
+Point Group  4/mmm
+Laue  Group  4/mmm
+Tetragonal
+Unique Axis  y
+
+Order    64
+Order P  16
+
+s.i.Vector  Modulus
+  1  1  1   2
+
+
+Setting B:
+
+Space Group  139  D4h^17  I4/mmm  -I 4 2
+Point Group  4/mmm
+Laue  Group  4/mmm
+Tetragonal
+Unique Axis  z
+
+Order    32
+Order P  16
+
+s.i.Vector  Modulus
+  0  0  1   2
+
+
+Change of Basis Setting A -&gt; Setting B:
+   CBMx = x+z, x-z, y
+InvCBMx = 1/2*x+1/2*y, z, 1/2*x-1/2*y
+</pre>
+<hr>
+
+<p>First of all, <samp>sginfo</samp> processes the Hall symbol and
+   reports the results under &quot;<samp>Setting&nbsp;A</samp>&quot;. Since
+   &quot;<samp>Unique&nbsp;Axis&nbsp;y</samp>&quot; is a very strange
+   setting for a tetragonal space group, <samp>sginfo</samp> cannot
+   find an entry in the internal table and hence only reports the (newly
+   generated) Hall symbol.
+<p>Fortunately there is the &quot;<samp>-Standard</samp>&quot;
+   option, which tells <samp>sginfo</samp> to try harder to find out
+   about the ITVA space group number. Therefore <samp>sginfo</samp>
+   tries to match the generators of all space groups in the internal
+   table (which do belong to the same point group) to the actual set
+   of symmetry matrices by building the proper <em>change-of-basis
+   matrix</em>, in this case coming up with space group <samp>I4/mmm</samp>.
+<p>The result of the space group finding process is not necessarily
+   the &quot;standard&quot; setting, but a certain <em>reference
+   setting</em>. Therefore <samp>sginfo</samp> evaluates which
+   &quot;conventions&quot;, either option &quot;<samp>-VolI</samp>&quot;
+   or &quot;<samp>-VolA</samp>&quot; (which is the default) are
+   currently selected, obtains the corresponding standard setting
+   und reports the results under &quot;<samp>Setting&nbsp;B</samp>&quot;.
+   Again <samp>sginfo</samp> starts to search for the reference
+   setting, this time only to get the corresponding change-of-basis
+   matrix.
+<p>In the last step, <samp>sginfo</samp> combines the change-of-basis
+   matrices for &quot;Setting&nbsp;A -> Reference Setting&quot; and
+   &quot;Setting&nbsp;B -> Reference Setting&quot; to obtain the matrix
+   and its inverse for &quot;Setting&nbsp;A -> Setting&nbsp;B&quot;.
+<p>If you do not trust <samp>sginfo</samp> and/or want to see
+   the individual change-of-basis matrices to the reference setting,
+   <a
+    href="sginfo-query.cgi?argl=-Verify+-Hall+%22-F+4y+2%22+-Standard"
+   >run <samp>sginfo</samp> with the &quot;<samp>-Verify</samp>&quot;
+   option set</a>.
+<p>Maybe it is sensible to add the following short definition:
+<p><samp>&nbsp;&nbsp;&nbsp;&quot;CBMx</samp>&quot; transforms
+   the <em>coordinates</em> of Setting&nbsp;A to coordinates of
+   Setting&nbsp;B.
+<br>&quot;<samp>InvCBMx</samp>&quot; transforms
+   the     coordinates      of Setting&nbsp;B to coordinates of
+   Setting&nbsp;A.
+<p>BTW: the execution time on a 486 DX2 66 MHz PC running Linux
+   is less than 0.5 seconds for the whole process above (two times
+   generation of the symmetry operations, two times finding the
+   space group with construction of the change-of-basis matrix).
+
+<p>The last example illustrates how easy it is to get the
+   change-of-basis matrix for the transformation of
+   the &quot;old&quot; standard setting of ITVI to the
+   &quot;new&quot; standard setting of ITVA:
+
+<hr>
+<pre>
+% <a name="sginfo_volia"
+   href="sginfo-query.cgi?argl=-VolI+15+-VolA+15"
+  >sginfo -VolI 15 -VolA 15</a>
+
+Setting A:
+
+Space Group  15:-c1  C2h^6  C2/c:-c1 = B112/b = B2/b  -B 2b
+Point Group  2/m
+Laue  Group  2/m
+Monoclinic
+Unique Axis  z
+
+Order     8
+Order P   4
+
+s.i.Vector  Modulus
+  0  1  0   2
+  0  0  1   2
+
+
+Setting B:
+
+Space Group  15:b1  C2h^6  C2/c:b1 = C12/c1  -C 2yc
+Point Group  2/m
+Laue  Group  2/m
+Monoclinic
+Unique Axis  y
+
+Order     8
+Order P   4
+
+s.i.Vector  Modulus
+  1  0  0   2
+  0  0  1   2
+
+
+Change of Basis Setting A -&gt; Setting B:
+   CBMx = x-y-1/4, z+1/4, -y
+InvCBMx = x-z+1/4, -z, y-1/4
+</pre>
+<hr>
+
+ <h3><a name="real_life">
+     A real life example</a>
+</h3>
+ <p>A xray powder pattern has been indexed with the <strong>POWDER</strong>
+    program of <em>D. Taupin</em> <a name="cite1" href="#ref1">[1]</a>.
+    The unit cell as found by the program was monoclinic,
+    <em>a</em>=8.63289, <em>b</em>=9.10859, <em>c</em>=17.699,
+    <em>gamma</em>=108.45. Examination of systematic absences
+    suggested space group <em>P 1 1 2<sub>1</sub>/n</em>.
+
+ <p>What is the standard setting of this space group and what are the
+    corresponding cell constants?
+
+<hr>
+ <pre>
+% <a
+   href="sginfo-query.cgi?argl=%22P+1+1+21/n%22+-Standard+-UnitCell=%228.63289+9.10859+17.699+108.45%22"
+  >sginfo &quot;P 1 1 21/n&quot; -Standard -UnitCell=&quot;8.63289 9.10859 17.699 108.45&quot;</a>
+
+Setting A:
+
+Space Group  14:c2  C2h^5  P21/c:c2 = P1121/n  -P 2n
+Point Group  2/m
+Laue  Group  2/m
+Monoclinic
+Unique Axis  z
+
+Order     4
+Order P   4
+
+s.i.Vector  Modulus
+  1  0  0   2
+  0  1  0   2
+  0  0  1   2
+
+
+Setting B:
+
+Space Group  14:b1  C2h^5  P21/c:b1 = P121/c1  -P 2ybc
+Point Group  2/m
+Laue  Group  2/m
+Monoclinic
+Unique Axis  y
+
+Order     4
+Order P   4
+
+s.i.Vector  Modulus
+  1  0  0   2
+  0  1  0   2
+  0  0  1   2
+
+
+Change of Basis Setting A -&gt; Setting B:
+   CBMx = x-y, z, -y
+InvCBMx = x-z, -z, y
+
+Setting A UnitCell  8.63289 9.10859 17.699 90 90 108.45
+Setting B UnitCell  8.63289 17.699 10.3789 90 123.644 90
+</pre>
+
+<hr>
+ <p>If you have the ITVA at hand, it is not a big trick to obtain
+    the standard setting <em>P 1 2<sub>1</sub>/c 1</em>.
+    What is more of
+    a problem is to find the correct change-of-basis matrix, even if you
+    have the ITVA. This is where <samp>sginfo</samp> steps in and can
+    save you a lot of cumbersome reasoning. Having <samp>CBMx</samp>, it is
+    now straightforward to compute the new cell parameters.
+
+ <p>The formula for the transformation of the metrical matrix G(A) of
+    Setting A to the metrical matrix G(B) of Setting B is
+    (see e.g. Boisen &amp; Gibbs <a name="cite2" href="#ref2">[2]</a>):
+
+ <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    G(B) = transpose(InvCBMx) * G(A) * InvCBMx
+
+ <p>By applying this formula <samp>sginfo</samp> finally
+    produces the cell parameters for Setting B.
+
+
+<hr>
+
+<h2><a name="getting_sginfo">
+    Getting SgInfo</a></h2>
+
+<p>For those who not want to learn more about <strong>SgInfo</strong>
+   at this point and want to play on their own machine right away:
+   here are some hot links:
+<ul>
+<li><a href="bin/sginfo_1_01_vc60.exe"
+   >Windows 32-bit executable</a>
+   (Expected to run also on 64-bit Windows systems.)
+<li><a href="bin/sginfo_1_01_dos.exe"
+   >DOS executable (from 1995)</a>
+<li><a href="bin/sginfo_1_01_mac_10.4_intel.exe.gz"
+   >Mac OS X 10.4 Intel executable</a>
+<li><a href="bin/sginfo_1_01_mac_10.4_ppc.exe.gz"
+   >Mac OS X 10.4 PPC executable</a>
+<li><a href="bin/sginfo_1_01.sea.hqx"
+   >Macintosh executable (from 1996)</a>
+   (for 68000 Macs, runs also on PowerMacs) [*]
+<li><a href="bin/sginfo_1_01_linux_redhat8.exe.gz"
+   >Linux executable (RedHat 8.0)</a>
+   (Expected to run on most systems.)
+<li><a href="bin/sginfo_1_01_linux_ancient.exe.gz"
+   >Linux executable (from 1995)</a>
+<li><a href="bin/sginfo_1_01_sun4.exe.Z"
+   >SunOS 4 executable</a>
+<li><a href="bin/sginfo_1_01_sol2.3.exe.Z"
+   >Sun Solaris 2.3 executable</a> [+]
+<li><a href="bin/sginfo_1_01_aix32.exe.Z"
+   >IBM AIX 3.2 executable</a>
+<li><a href="bin/sginfo_1_01_irix5.exe.Z"
+   >Silicon Graphics IRIX 5 executable</a>
+<li><a href="bin/sginfo_1_01_vms_vax.exe"
+   >VMS VAX executable</a>
+<li><a href="bin/sginfo_1_01_vms_alpha.exe"
+   >VMS Alpha executable</a>
+<li><a href="bin/sginfo_1_01_osf1_v3_2_alpha.exe"
+   >OSF1 Alpha executable</a>
+</ul>
+<hr>
+[*] Courtesy Jon Tischler (<a href="mailto:TischlerJZ@ornl.gov">TischlerJZ@ornl.gov</a>)<br>
+[+] Courtesy Andreas Karrer (<a href="mailto:karrer@ife.ee.ethz.ch">karrer@ife.ee.ethz.ch</a>)
+<hr>
+<p>For all who want to test their compilier: some source code:
+<ul>
+<li><a href="sginfo_1_01.tar.gz">
+    sginfo_1_01.tar.gz</a>
+<li><a href="sginfo_1_01.tar.Z">
+    sginfo_1_01.tar.Z</a>
+<li><a href="sginfo_1_01.zip">
+    sginfo_1_01.zip</a>
+</ul>
+
+<HR>
+<h2><a name="other_software"
+>Other space group software and web sites</a></h2>
+You are not entirely happy with SgInfo?
+<P>
+You want more Space Group Info?
+<P>
+There is more available:
+<ul>
+<li>The <A HREF="http://www.calidris-em.com/spacegroupexplorer.php"
+    >Space Group Explorer</A><BR>
+    A free Windows program based on SgInfo.
+    <P>
+<li><a href=
+     "http://www.cryst.ehu.es/"
+    >Bilbao Crystallographic Server</a>
+</ul>
+
+<hr>
+<p><strong>Warning:</strong>
+   If you do not know the basics of <strong>C</strong>,
+   the rest of this document will be very boring.<br>
+
+<HR>
+<h2><a name="known_bugs">
+    Known Bugs (as of May 2001)</a></h2>
+<ul>
+<li>sginfo.h: TabSgName: wrong P_42_1_2, correct P_4_21_2
+<li>sginfo.h: TabSgName: wrong R_32, correct R_3_2
+<li>sghkl.c: SetListMin_hkl(): wrong results for some trigonal space groups
+<li>sgclib.c: TransformSgInfo(): unit translations need to be transformed
+              since they can give rise to fractional translations
+<li>sgfind.c: Depending on the orientation of the basis vectors corresponding
+	      to the input symmetry operations, space group Pa-3 is sometimes
+	      not recognized.
+</ul>
+
+<hr>
+<h2><a name="using_sginfo">
+    Using SgInfo in your application</a></h2>
+<p>The <strong>SgInfo</strong> library routines are grouped
+   into five C source code files and one C header file:
+
+<pre>
+        sginfo.h        header file with global definitions
+        sgclib.c        core library routines
+        sgio.c          input/output routines
+        sgfind.c        space group finding routines
+        sghkl.c         reciprocal space routines
+        sgsi.c          semi-invariant routines
+</pre>
+
+<p>To demonstrate how to use the library there are two
+   additional files with driver routines:
+
+<pre>
+        sginfo.c        the driver for the examples above
+        sgquick.c       a very simple template driver
+</pre>
+
+<p>Have a look at <samp>sgquick.c</samp>. This driver takes
+   one command line argument,
+   e.g. <samp>sgquick&nbsp;&quot;VolA&nbsp;P2&quot;</samp>,
+   and sends this string to <samp>BuildSpgrInfo()</samp>.
+<p>The first half of <samp>BuildSgInfo()</samp> does nothing
+   more than splitting the input string <samp>SgName</samp>
+   into the part which selects the conventions
+   (like the <samp>-Hall|VolA|VolI</samp> options in the
+   preceding examples) and the space group symbol itself.
+<p>The first call to the <strong>SgInfo</strong> library is
+   <samp>FindTabSgNameEntry()</samp>. This routine maps
+   space group numbers, Sch&ouml;nflies symbols, and
+   Hermann-Mauguin symbols to Hall symbols.
+<p>In the next section we allocate memory to hold the
+   Seitz matrices and some additional parameters.
+   Then the SgInfo structure is initialized, the Hall symbol
+   is translated to Seitz matrices, thereby generating the
+   whole group through multiplication.
+<p>The final step is a call to <samp>CompleteSgInfo()</samp>.
+   This routine sorts and reduces the list of Seitz matrices,
+   determines crystal system and point group, and a new
+   Hall symbol is derived from the symmetry operations.
+   This new Hall symbol is used to find the entry in the
+   internal table; if the entry is known in advance,
+   <strong>SgInfo</strong> just verifies if the new result
+   is the same (or signals an &quot;Internal Error&quot;
+   otherwise). If there is no matching entry,
+   <strong>SgInfo</strong> does not report the
+   ITVA space group name and number at this point.
+
+<hr>
+ <pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;ctype.h&gt;
+#include &lt;string.h&gt;
+
+
+<a href="sginfo_reference.html#how_to_include_sginfo_h"
+>#include &quot;sginfo.h&quot;</a>
+
+
+static int str_ibegin(const char *s1, const char *s2) /* string ignore-case */
+{                                                     /* begin              */
+  char     u1, u2;
+
+  while (*s1 &amp;&amp; *s2)
+  {
+    u1 = toupper(*s1++);
+    u2 = toupper(*s2++);
+    if      (u1 &lt; u2) return -1;
+    else if (u1 &gt; u2) return  1;
+  }
+  if (*s2) return -1;
+  return 0;
+}
+
+
+int BuildSgInfo(T_SgInfo *SgInfo, const char *SgName)
+{
+  int                VolLetter;
+  const T_TabSgName  *tsgn;
+
+
+  /* look for &quot;VolA&quot;, &quot;VolI&quot;, or &quot;Hall&quot;
+   */
+
+  while (*SgName &amp;&amp; isspace(*SgName)) SgName++;
+
+  VolLetter = -1;
+
+  if      (isdigit(*SgName))
+    VolLetter = 'A';
+  else if (str_ibegin(SgName, &quot;VolA&quot;) == 0)
+  {
+    VolLetter = 'A';
+    SgName += 4;
+  }
+  else if (   str_ibegin(SgName, &quot;VolI&quot;) == 0
+           || str_ibegin(SgName, &quot;Vol1&quot;) == 0)
+  {
+    VolLetter = 'I';
+    SgName += 4;
+  }
+  else if (str_ibegin(SgName, &quot;Hall&quot;) == 0)
+  {
+    VolLetter = 0;
+    SgName += 4;
+  }
+
+  while (*SgName &amp;&amp; isspace(*SgName)) SgName++;
+
+  /* default is &quot;VolA&quot;
+   */
+
+  if (VolLetter == -1)
+    VolLetter = 'A';
+
+  /* if we do not have a Hall symbol do a table look-up
+   */
+
+  tsgn = NULL;
+
+  if (VolLetter)
+  {
+    tsgn = <A HREF="sginfo_reference.html#func_FindTabSgNameEntry">FindTabSgNameEntry</A>(SgName, VolLetter);
+    if (tsgn == NULL) return -1; /* no matching table entry */
+    SgName = tsgn-&gt;HallSymbol;
+  }
+
+  /* Allocate memory for the list of Seitz matrices and
+     a supporting list which holds the characteristics of
+     the rotation parts of the Seitz matrices
+   */
+
+  SgInfo-&gt;MaxList = 192; /* absolute maximum number of symops */
+
+  SgInfo-&gt;ListSeitzMx
+    = malloc(SgInfo-&gt;MaxList * sizeof (*SgInfo-&gt;ListSeitzMx));
+
+  if (SgInfo-&gt;ListSeitzMx == NULL) {
+    <A HREF="sginfo_reference.html#func_SetSgError">SetSgError</A>(&quot;Not enough core&quot;);
+    return -1;
+  }
+
+  SgInfo-&gt;ListRotMxInfo
+    = malloc(SgInfo-&gt;MaxList * sizeof (*SgInfo-&gt;ListRotMxInfo));
+
+  if (SgInfo-&gt;ListRotMxInfo == NULL) {
+    <A HREF="sginfo_reference.html#func_SetSgError">SetSgError</A>(&quot;Not enough core&quot;);
+    return -1;
+  }
+
+  /* Initialize the SgInfo structure
+   */
+
+  <A HREF="sginfo_reference.html#func_InitSgInfo">InitSgInfo</A>(SgInfo);
+  SgInfo-&gt;TabSgName = tsgn; /* in case we know the table entry */
+
+  /* Translate the Hall symbol and generate the whole group
+   */
+
+  <A HREF="sginfo_reference.html#func_ParseHallSymbol">ParseHallSymbol</A>(SgName, SgInfo);
+  if (SgError != NULL) return -1;
+
+  /* Do some book-keeping and derive crystal system, point group,
+     and - if not already set - find the entry in the internal
+     table of space group symbols
+   */
+
+  return <A HREF="sginfo_reference.html#func_CompleteSgInfo">CompleteSgInfo</A>(SgInfo);
+}
+
+
+int main(int argc, char *argv[])
+{
+  T_SgInfo  SgInfo;
+
+
+  if (argc == 2)
+  {
+    if (BuildSgInfo(&amp;SgInfo, argv[1]) != 0)
+      fprintf(stderr, &quot;%s\n&quot;, SgError);
+    else
+    {
+      <A HREF="sginfo_reference.html#func_ListSgInfo">ListSgInfo</A>(&amp;SgInfo, 1, 0, stdout);
+
+      if (SgError)
+        fprintf(stderr, &quot;%s\n&quot;, SgError);
+    }
+  }
+
+  return 0;
+}
+</pre>
+
+<hr>
+<h3><a name="sginfo_struct">
+    Understanding the <samp>SgInfo</samp> structure</a></h3>
+<p>Of course there is no big point in passing a pointer to a structure
+   to some strange routine without knowing what you get back.
+   We need to investigate the definition of <samp>T_SgInfo</samp>,
+   taken from <samp>sginfo.h</samp>:
+<hr>
+<pre>
+typedef struct
+  {
+    int                  GenOption;
+    int                  Centric;
+    int                  InversionOffOrigin;
+    const T_LatticeInfo  *LatticeInfo;
+    int                  StatusLatticeTr;
+    int                  OriginShift[3];
+    int                  nList;
+    int                  MaxList;
+    T_RTMx               *ListSeitzMx;
+    T_RotMxInfo          *ListRotMxInfo;
+    int                  OrderL;
+    int                  OrderP;
+    int                  XtalSystem;
+    int                  UniqueRefAxis;
+    int                  UniqueDirCode;
+    int                  ExtraInfo;
+    int                  PointGroup;
+    int                  nGenerator;
+    int                   Generator_iList[4];
+    char                 HallSymbol[MaxLenHallSymbol + 1];
+    const T_TabSgName    *TabSgName;
+    const int            *CCMx_LP;
+    int                  n_si_Vector;
+    int                  si_Vector[9];
+    int                  si_Modulus[3];
+  }
+  <A HREF="sginfo_reference.html#tdef_T_SgInfo">T_SgInfo</A>;
+</pre>
+<hr>
+<p>Live is not that easy, the definition of <samp>T_SgInfo</samp>
+   obviously needs four previous definitions, namely of
+   <samp>T_LatticeInfo</samp>,
+   <samp>T_RTMx</samp>,
+   <samp>T_RotMxInfo</samp>, and
+   <samp>T_TabSgName</samp>.
+<p>Now we approach <samp>T_SgInfo</samp> the following way: we just
+   want to know how to get hold of the symmetry matrices.
+<p>In case of a <em>primitive and acentric</em> space group
+   this is pretty simple: you need
+<ul>
+  <li><samp>SgInfo.nList</samp>
+      to know how many Seitz matrices are stored in
+      <samp>SgInfo.ListSeitzMx</samp>,
+  <li>and the definition of <samp>T_RTMx</samp> to know
+      how to use <samp>SgInfo.ListSeitzMx</samp>.
+</ul>
+<p>Here we go:
+<hr>
+<pre>
+typedef union
+  {
+    struct { int R[9], T[3]; } s;
+    int                        a[12];
+  }
+  <A HREF="sginfo_reference.html#tdef_T_RTMx">T_RTMx</A>;
+</pre>
+
+<hr>
+<p><samp>T_RTMx</samp> is a union of a <samp>struct</samp>
+   with 12 <samp>int</samp> and a simple array of 12 <samp>int</samp>.
+
+<p>If you are scared by unions of structs and arrays,
+   you might be delighted to learn that
+   <samp>T_LatticeInfo</samp> as well as <samp>T_RotMxInfo</samp>
+   as well as <samp>T_TabSgName</samp> are simple structs
+   of basic data types. But we save this for later.
+
+<p>How does a &quot;Rotation-Translation-Matrix&quot;
+   <samp>T_RTMx</samp> look like for, e.g., a 2-fold screw
+   along <samp>z</samp>, also known as as
+   &quot;<samp>-x, -y, z+1/2</samp>&quot;?
+<p>The debugger always knows the truth:
+<hr>
+<pre>
+(dbx) print SgInfo->ListSeitzMx[1]
+union  {
+    s = struct  {
+        R = {
+            [0] -1
+            [1] 0
+            [2] 0
+            [3] 0
+            [4] -1
+            [5] 0
+            [6] 0
+            [7] 0
+            [8] 1
+        }
+        T = {
+            [0] 0
+            [1] 0
+            [2] 6
+        }
+    }
+    a = {
+        [0] -1
+        [1] 0
+        [2] 0
+        [3] 0
+        [4] -1
+        [5] 0
+        [6] 0
+        [7] 0
+        [8] 1
+        [9] 0
+        [10] 0
+        [11] 6
+    }
+}
+</pre>
+<hr>
+<p>The rotation part <samp>R</samp> is pretty obvious,
+   &quot;1&quot encodes
+      &quot;<samp>x</samp>&quot;
+   or &quot;<samp>y</samp>&quot;
+   or &quot;<samp>z</samp>&quot;,
+   depending on the position;
+   &quot;-1&quot encodes
+      &quot;<samp>-x</samp>&quot;
+   or &quot;<samp>-y</samp>&quot;
+   or &quot;<samp>-z</samp>&quot;.
+<br>The translation part <samp>T</samp> needs a further definition:
+    the <em>Seitz&nbsp;Matrix&nbsp;Translation&nbsp;Base&nbsp;Factor</em>
+    &quot;<samp>STBF</samp>&quot;. This factor is defined to be
+    <samp>12</samp> in <samp>sginfo.h</samp>.
+    Therefore <samp>T[2] = 6</samp> translates
+    to &quot;<samp>+6/12 = +1/2</samp>&quot;.
+ <p>Using the ITVA &quot;augmented 4*4&nbsp;matrix&quot; notation, the mapping
+    of a position <samp>(x,y,z)</samp> to the symmetry equivalent
+    position <samp>(xs,ys,zs)</samp> by an element of
+    <samp>SgInfo.ListSeitzMx</samp> can be summerized by:
+<hr>
+<pre>
+        ( xs )     ( R[0]  R[1]  R[2]  T[0]/STBF )  ( x )
+        ( ys )  =  ( R[3]  R[4]  R[5]  T[1]/STBF )  ( y )
+        ( zs )     ( R[6]  R[7]  R[8]  T[2]/STBF )  ( z )
+        ( 1  )     (  0     0     0     1        )  ( 1 )
+</pre>
+<hr>
+<p>For <em>primitve centro-symmetric</em> space groups things are
+   slightly more involved. You have to evaluate two variables,
+   <samp>SgInfo.Centric</samp> and
+   <samp>SgInfo.InversionOffOrigin</samp>.
+<p>If - <em>after</em> calling <samp>CompleteSgInfo()</samp> -
+    both variables are set to <samp>0</samp>, the space group
+    is acentric. If <samp>SgInfo.Centric</samp> is set
+    to <samp>-1</samp>, there is an inversion operation at the origin
+    and <samp>SgInfo.ListSeitzMx</samp> will contain only an acentric
+    subset of the space group. If you need all symmetry operations
+    you have to - mathematically spoken - multiply each of the matrices in
+    <samp>SgInfo.ListSeitzMx</samp> with the inversion matrix.
+    In practive this means you simply have to take each element of
+    a matrix with reversed sign.
+<p>If <samp>SgInfo.Centric</samp> is <samp>0</samp> but
+    <samp>SgInfo.InversionOffOrigin</samp> is set to <samp>1</samp>,
+    <samp>SgInfo.ListSeitzMx</samp> will contain the whole (primitive)
+    space group. No further action has to be taken to get all
+    symmetry operations. In fact, if you only need to know how to
+    get all operations, you just need to take care of
+    <samp>SgInfo.Centric</samp>.
+
+<hr>
+<h4><a name="latticeinfo">
+    Using <samp>SgInfo.LatticeInfo</samp></a></h4>
+    For <em>centred</em> space groups you need to evaluate
+    <samp>SgInfo.LatticeInfo</samp>. This is the definition
+    of <samp>T_LatticeInfo</samp>:
+<hr>
+<pre>
+        typedef struct
+          {
+            int        Code;
+            int        nTrVector;
+            const int  *TrVector;
+          }
+          <A HREF="sginfo_reference.html#tdef_T_LatticeInfo">T_LatticeInfo</A>;
+</pre>
+<hr>
+<p><samp>LatticeInfo.Code</samp> is one of
+   <samp>{'P',  'A', 'B', 'C',  'I',  'R', 'S', 'T',  'F'}</samp>.
+   Except for <samp>'S'</samp> and <samp>'T'</samp> this should be
+   clear. For now forget about these strange lattice codes
+   <samp>'S'</samp> and <samp>'T'</samp>.
+<p>Understanding <samp>LatticeInfo.nTrVector</samp> is equally
+    straightforward. It gives the number of lattice translation
+    vectors which are stored in the location to which
+    <samp>LatticeInfo.TrVector</samp> points.
+<p><samp>TrVector[0..2]</samp> gives the first vector
+    (in <em>any</em> case <samp>{ 0,0,0 }</samp>),
+    <samp>TrVector[3..5]</samp> gives the second, and so on,
+    four at maximum. The elements of
+    <samp>LatticeInfo.TrVector</samp> are multiplied by
+    <samp>STBF</samp>, hence compatible to the translation parts
+    of the Seitz matrices.
+<p>A little table summarizes all possibilities for
+    <samp>SgInfo.LatticeInfo</samp>:
+<hr>
+<pre>
+        Code  nTrVector  TrVector
+         'P'      1      0,0,0
+         'A'      2      0,0,0   0 ,1/2,1/2
+         'B'      2      0,0,0  1/2, 0 ,1/2
+         'C'      2      0,0,0  1/2,1/2, 0
+         'I'      2      0,0,0  1/2,1/2,1/2
+         'R'      3      0,0,0  2/3,1/3,1/3  1/3,2/3,2/3
+         'S'      3      0,0,0  1/3,1/3,2/3  2/3,2/3,1/3
+         'T'      3      0,0,0  1/3,2/3,1/3  2/3,1/3,2/3
+         'F'      4      0,0,0   0 ,1/2,1/2  1/2, 0 ,1/2  1/2,1/2, 0
+</pre>
+<hr>
+<p>Maybe the whole SgInfo structure stuff got somewhat abstract. A
+   <a href="sginfo_loop_symops.html">
+   small piece of code</a>
+   says more than 1000 words!
+
+<hr>
+<h2><a name="Using_the_space_group_finder">
+             Using the space group finder</a></h2>
+<p>So far you have seen how to pass a space group symbol
+   or number to <strong>SgInfo</strong> and how to obtain
+   the symmetry matrices. But this is not all you can
+   do with <strong>SgInfo</strong>.
+<p>Say, you have a program which takes
+   atom coordinates, looks for symmetry elements and
+   produces a list of the operations found.
+   Now you can either take the International
+   Tables to find out what space group you are dealing
+   with, or you can make life easier for yourself and use
+   <strong>SgInfo</strong>:
+   just pass the list of operations to the library
+   and wait a few milli-seconds for the
+   space group finder to do the job for you. You will not only
+   get the space group number, but also the change-of-basis matrix
+   from your arbitrary setting to a reference setting.
+<p>Here is how to do that:
+
+<hr>
+
+ <pre>
+#include &lt;everything_you_like.h&gt;
+<a href="sginfo_reference.html#how_to_include_sginfo_h"
+>#include &quot;sginfo.h&quot;</a>
+
+int main(int argc, char *argv[])
+{
+  /* This is your program, you do anything you can
+     to find weird symmetry matrices.
+
+     You did not forget to declare SgInfo
+     plus making two calls to malloc() to get memory
+     for SgInfo.ListSeitzMx and SgInfo.ListRotMxInfo.
+     Copy this from sgquick.c.
+
+     This time you do not have space group symbols
+     in advance and you do not need the table look-up.
+     You just start with:
+   */
+
+  <A HREF="sginfo_reference.html#func_InitSgInfo">InitSgInfo</A>(&amp;SgInfo);
+
+  while (you_think_you_have_to_loop)
+  {
+    /* Fine. Now, everytime you found a new operation,
+       you set up a buffer SeitzMx (do never, never, never
+       ever set SgInfo.ListSeitzMx directly!). Passing
+       the buffer SeitzMx to the library is exceptionally
+       simple:
+     */
+
+    if (<A HREF="sginfo_reference.html#func_Add2ListSeitzMx">Add2ListSeitzMx</A>(&amp;SgInfo, &amp;SeitzMx) &lt; 0)
+    {
+      /* if Add2ListSeitzMx() returns a value &lt; 0
+         an error has occured and the global variable
+         SgError has been set. A possible consequence:
+       */
+
+      fprintf(stderr, &quot;%s\n&quot;, SgError);
+      exit(1);
+    }
+  }
+
+  /* Fine. After you have passed _all_ symmetry operations
+     - including a possible inversion operation and
+     lattice centring vectors (rotation part of SeitzMx
+     = identity, translation part = centring vector) -
+     via Add2ListSeitzMx() you are ready to call:
+   */
+
+  if (<A HREF="sginfo_reference.html#func_CompleteSgInfo">CompleteSgInfo</A>(&amp;SgInfo) != 0)
+  {
+    /* an error has occured, evaluate SgError, terminate */
+  }
+
+  /* Fine. Now you know you have a &quot;legal&quot; space
+     group. Maybe you are lucky and you hit a
+     setting which is in the internal table.
+     Simply ask:
+   */
+
+  if (SgInfo.TabSgName != NULL)
+  {
+    /* Yes, really! If you are not interested in
+       change-of-basis matrices you are done.
+       You could, e.g., print out the table entry
+       and terminate:
+     */
+
+    <A HREF="sginfo_reference.html#func_PrintTabSgNameEntry">PrintTabSgNameEntry</A>(SgInfo.TabSgName, 0, 0, stdout);
+    putc('\n', stdout);
+    exit(0);
+  }
+
+  /* Hm. Now you have to have declared
+       const <A HREF="sginfo_reference.html#tdef_T_TabSgName">T_TabSgName</A>  *ReferenceTabSgName;
+       <A HREF="sginfo_reference.html#tdef_T_RTMx">T_RTMx</A>             CBMx, InvCBMx;
+     somewhere before. Try the hard way:
+   */
+
+  ReferenceTabSgName = <A HREF="sginfo_reference.html#func_FindReferenceSpaceGroup">FindReferenceSpaceGroup</A>(&amp;SgInfo,
+                                               &amp;CBMx, &amp;InvCBMx);
+  if (ReferenceTabSgName == NULL)
+  {
+    /* This is really bad! If you arrive here an internal
+       error has occured and SgError has been set. This
+       means, either you have corrupted SgInfo in some way
+       or I (see bottom line) have made some stupid error.
+       Let me know! Do it right now!
+     */
+  }
+
+  /* Bingo! For the sake of simplicity we ignore
+     CBMx and InvCBMx here. Print the reference setting
+     and finish:
+   */
+
+  <A HREF="sginfo_reference.html#func_PrintTabSgNameEntry">PrintTabSgNameEntry</A>(ReferenceTabSgName, 0, 0, stdout);
+  putc('\n', stdout);
+
+  return 0;
+}
+
+/* P.S.: If you made it to this point you might like to
+   learn that there are two routines which help you
+   adding the inversion operation and lattice centring
+   vectors:
+      <A HREF="sginfo_reference.html#func_AddInversion2ListSeitzMx">AddInversion2ListSeitzMx</A>();
+      <A HREF="sginfo_reference.html#func_AddLatticeTr2ListSeitzMx">AddLatticeTr2ListSeitzMx</A>();
+   Look for more details in the <A HREF="sginfo_reference.html">reference section</A>.
+ */
+</pre>
+
+<HR>
+<h3><a name="copyright">Copyright Notice</a></h3>
+<STRONG>Space Group Info (c) 1994-96 Ralf W. Grosse-Kunstleve</STRONG>
+<p>
+Permission to use and distribute this software and its documentation
+for noncommercial use and without fee is hereby granted, provided that
+the above copyright notice appears in all copies and that both that
+copyright notice and this permission notice appear in the supporting
+documentation. It is not allowed to sell this software in any way.
+This software is not in the public domain.
+<p>
+IF YOU COPY AND/OR USE THIS SOFTWARE, YOU AGREE THAT THE SOFTWARE IS
+FURNISHED ON AN "AS IS" BASIS AND THAT THE AUTHOR IN NO WAY
+WARRANTS THE SOFTWARE OR ANY OF ITS RESULTS AND IS IN NO WAY LIABLE
+FOR ANY USE YOU MAKE OF THE SOFTWARE.
+
+<hr>
+<h3><a name="references">References</a></h3>
+ <dl>
+  <dt> <a name="ref1" href="#cite1">[1]</a>
+       D. Taupin;
+       <cite>Enhancements in Powder-Pattern Indexing</cite>;
+       J.Appl.Cryst.(1989), <strong>V22</strong>, 455-459.
+  <dt> <a name="ref2" href="#cite2">[2]</a>
+       M.B. Boisen, Jr. &
+       G.V. Gibbs;
+       <cite>Mathematical Crystallography;</cite>
+       Reviews in Mineralogy, Volume 15, Revised Edition;
+       Mineralogical Society of America; Washington D.C. 1990
+</dl>
+
+<hr>
+
+<address>
+ Ralf W. Grosse-Kunstleve
+ &lt;<a href="mailto:rwgk@cci.lbl.gov"
+                    >rwgk@cci.lbl.gov</a>&gt;
+</address>
+
+</body>
+</html>

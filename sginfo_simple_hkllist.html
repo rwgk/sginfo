@@ -1,0 +1,115 @@
+<html>
+
+<head>
+<title>sginfo.c: Simple_hklList()</title>
+</head>
+
+<body>
+<h2>sginfo.c: Simple_hklList()</h2>
+<hr>
+ <pre>
+static void Simple_hklList(T_SgInfo *SgInfo, int Maxh, int Maxk, int Maxl,
+                           int ListSysAbsent)
+{
+  int        h, k, l, iList, restriction, M, n, i;
+  int        Minh, Mink, Minl;
+  int        uvw[3];
+  int        CCMx_PL[9], deterCCMx_LP, hP, kP, lP;
+
+
+  if (SgInfo-&gt;LatticeInfo-&gt;Code != 'P')
+  {
+    deterCCMx_LP = deterRotMx(SgInfo-&gt;CCMx_LP);
+                 InverseRotMx(SgInfo-&gt;CCMx_LP, CCMx_PL);
+
+    if (deterCCMx_LP &lt; 1)
+      goto ReturnError;
+  }
+
+  SetListMin_hkl(SgInfo, Maxk, Maxl, &amp;Minh, &amp;Mink, &amp;Minl);
+
+  fprintf(stdout, &quot;&gt;Begin hklList\n&quot;);
+
+  for (h = Minh; h &lt;= Maxh; h++)
+  for (k = Mink; k &lt;= Maxk; k++)
+  for (l = Minl; l &lt;= Maxl; l++)
+  {
+    iList = IsSysAbsent_hkl(SgInfo, h, k, l, &amp;restriction);
+    if (SgError != NULL)
+      return;
+
+    M = BuildEq_hkl(SgInfo, NULL, h, k, l);
+    if (SgError != NULL)
+      return;
+
+    if (iList == 0)
+    {
+      if ((iList = IsSuppressed_hkl(SgInfo, Minh, Mink, Minl,
+                                                  Maxk, Maxl,
+                                               h,    k,    l)) != 0)
+        n = fprintf(stdout, &quot;# %3d %3d %3d  %3d  [%d]&quot;,
+                            h, k, l, M, iList);
+      else
+        n = fprintf(stdout, &quot;  %3d %3d %3d  %3d&quot;,
+                            h, k, l, M);
+
+      if (restriction &gt;= 0)
+      {
+        while (n &lt; 27) { n++; putc(' ', stdout); }
+        n += fprintf(stdout, &quot; %2d/%d&quot;, restriction, STBF);
+      }
+
+      while (n &lt; 34) { n++; putc(' ', stdout); }
+      if (Is_si(SgInfo, h, k, l) == 1)
+        n += fprintf(stdout, &quot; s.i.&quot;);
+
+      while (n &lt; 41) { n++; putc(' ', stdout); }
+      Set_uvw(SgInfo, h, k, l, uvw);
+      for (i = 0; i &lt; SgInfo-&gt;n_si_Vector; i++)
+        n += fprintf(stdout, &quot; %3d&quot;, uvw[i]);
+
+      if (SgInfo-&gt;LatticeInfo-&gt;Code != 'P')
+      {
+        hP = h * CCMx_PL[0] + k * CCMx_PL[3] + l * CCMx_PL[6];
+        kP = h * CCMx_PL[1] + k * CCMx_PL[4] + l * CCMx_PL[7];
+        lP = h * CCMx_PL[2] + k * CCMx_PL[5] + l * CCMx_PL[8];
+
+        if (hP % deterCCMx_LP || kP % deterCCMx_LP || lP % deterCCMx_LP)
+          goto ReturnError;
+
+        hP /= deterCCMx_LP;
+        kP /= deterCCMx_LP;
+        lP /= deterCCMx_LP;
+
+        while (n &lt; 55) { n++; putc(' ', stdout); }
+          n += fprintf(stdout, &quot; P  %3d %3d %3d&quot;,
+                               hP, kP, lP);
+      }
+
+      putc('\n', stdout);
+    }
+    else if (ListSysAbsent)
+      fprintf(stdout, &quot;# %3d %3d %3d  %3d  (%d)\n&quot;,
+                      h, k, l, M, iList);
+  }
+
+  fprintf(stdout, &quot;&gt;End hklList\n&quot;);
+
+  return;
+
+  ReturnError:
+
+  SetSgError(&quot;Internal Error: Simple_hklList()&quot;);
+  return;
+}
+</pre>
+
+<hr>
+<address>
+ Ralf W. Grosse-Kunstleve
+ &lt;<a href="mailto:rwgk@cci.lbl.gov"
+                    >rwgk@cci.lbl.gov</a>&gt;
+</address>
+
+</body>
+</html>
