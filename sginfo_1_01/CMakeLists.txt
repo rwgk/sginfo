@@ -13,9 +13,4 @@ add_library(sginfo
   sginfo.h
   )
 
-#target_link_libraries(sginfo
-#  PUBLIC
-#    sginfo::module
-#
-#  )
 

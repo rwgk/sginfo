@@ -7,3 +7,14 @@ See also:
   - http://cci.lbl.gov/sginfo/
   - https://github.com/rwgk/sglite  # No known bugs but also no documentation.
   - http://cctbx.sf.net/  # Look for sgtbx. No known bugs, but large.
+
+# Build instructions
+You can now build the sginfo library using CMake.
+
+The following lines will build the library
+```bash
+mkdir -p build
+cd build
+cmake ..
+cmake --build .
+```
