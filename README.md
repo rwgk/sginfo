@@ -14,6 +14,7 @@ See also:
 # Build instructions
 
 ```
+cd sginfo_1_01
 clang -o sginfo sgclib.c sgfind.c sghkl.c sgio.c sgsi.c sginfo.c -lm
 ```
 
